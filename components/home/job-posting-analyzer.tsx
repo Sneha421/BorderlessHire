@@ -95,10 +95,10 @@ export function JobPostingAnalyzer() {
   }
 
   return (
-    <section className="mt-6 rounded-[2rem] border border-amber-200 bg-amber-50/80 p-4 shadow-sm dark:border-amber-500/30 dark:bg-amber-500/10 sm:p-6">
+    <section className="mt-5 rounded-[1.6rem] border border-sky-200 bg-sky-50/80 p-4 shadow-sm dark:border-sky-500/30 dark:bg-sky-500/10 sm:rounded-[1.8rem] sm:p-5">
       <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
         <div>
-          <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-amber-900 dark:text-amber-200">
+          <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-sky-900 dark:text-sky-200">
             Multimodal posting scan
           </p>
           <h2 className="mt-3 text-2xl font-semibold text-slate-950 dark:text-white">
@@ -119,7 +119,7 @@ export function JobPostingAnalyzer() {
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
                 onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-                className="rounded-2xl border border-amber-200 bg-white px-4 py-3 text-sm text-slate-800 dark:border-amber-500/30 dark:bg-slate-950 dark:text-slate-100"
+                className="rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm text-slate-800 dark:border-sky-500/30 dark:bg-slate-950 dark:text-slate-100"
               />
             </label>
 
@@ -132,7 +132,7 @@ export function JobPostingAnalyzer() {
                 onChange={(event) => setPostingText(event.target.value)}
                 rows={5}
                 placeholder="Paste a job description, salary note, or visa requirement text."
-                className="rounded-2xl border border-amber-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400 dark:border-amber-500/30 dark:bg-slate-950 dark:text-white"
+                className="rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-sky-500/30 dark:bg-slate-950 dark:text-white"
               />
             </label>
 
@@ -147,15 +147,15 @@ export function JobPostingAnalyzer() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="inline-flex rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-amber-300"
+                className="button-primary dark:border-blue-300/20"
               >
-                {isLoading ? "Analyzing..." : "Analyze Posting"}
+                {isLoading ? "Analyzing..." : "Analyze Now"}
               </button>
             </div>
           </form>
         </div>
 
-        <div className="rounded-[1.75rem] border border-amber-200 bg-white/80 p-5 dark:border-amber-500/20 dark:bg-slate-950/60">
+        <div className="rounded-[1.75rem] border border-sky-200 bg-white/80 p-5 dark:border-sky-500/20 dark:bg-slate-950/60">
           {analysis ? (
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -232,7 +232,7 @@ export function JobPostingAnalyzer() {
               </div>
             </div>
           ) : (
-            <div className="flex h-full min-h-[18rem] items-center justify-center rounded-[1.5rem] border border-dashed border-amber-300 bg-amber-50/70 p-6 text-center dark:border-amber-500/30 dark:bg-amber-500/5">
+            <div className="flex h-full min-h-[18rem] items-center justify-center rounded-[1.5rem] border border-dashed border-sky-300 bg-sky-50/70 p-6 text-center dark:border-sky-500/30 dark:bg-sky-500/5">
               <div className="max-w-md">
                 <p className="text-lg font-semibold text-slate-950 dark:text-white">
                   Analysis will appear here

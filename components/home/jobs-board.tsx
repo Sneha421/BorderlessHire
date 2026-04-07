@@ -349,13 +349,13 @@ export function JobsBoard() {
   return (
     <main className="relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-grid-fade bg-[size:32px_32px] opacity-30" />
-      <section className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-7xl flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
+      <section className="mx-auto flex min-h-[calc(100vh-84px)] w-full max-w-[1600px] flex-col px-2 py-3 sm:px-3 sm:py-4 lg:px-4">
         <HeroSection featuredCount={featuredCount} totalJobs={boardJobs.length} />
 
-        <div className="mt-6 rounded-[2rem] border border-white/70 bg-white/75 p-4 shadow-card backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/70 sm:p-6">
+        <div className="mt-4 rounded-[1.5rem] border border-white/70 bg-white/75 p-2.5 shadow-card backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/70 sm:rounded-[1.75rem] sm:p-4">
           <div
             id="job-filters"
-            className="rounded-[1.75rem] border border-slate-200 bg-slate-950 px-5 py-5 text-white dark:border-slate-800"
+            className="rounded-[1.35rem] border border-slate-200 bg-slate-950 px-4 py-4 text-white dark:border-slate-800 sm:rounded-[1.55rem] sm:px-5 sm:py-5"
           >
             <div className="flex flex-wrap items-center gap-2">
               {(
@@ -382,7 +382,7 @@ export function JobsBoard() {
                 <select
                   value={industry}
                   onChange={(event) => updateIndustry(event.target.value)}
-                  className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-300"
+                  className="ui-select rounded-2xl border border-sky-200/18 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-300"
                 >
                   <option value="All">All industries</option>
                   {industries.map((item) => (
@@ -400,7 +400,7 @@ export function JobsBoard() {
                 <select
                   value={salaryBand}
                   onChange={(event) => updateSalaryBand(event.target.value)}
-                  className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-300"
+                  className="ui-select rounded-2xl border border-sky-200/18 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-300"
                 >
                   {salaryBands.map((band) => (
                     <option key={band.id} value={band.id} className="text-slate-900">
@@ -417,7 +417,7 @@ export function JobsBoard() {
                 <select
                   value={visaType}
                   onChange={(event) => updateVisaType(event.target.value)}
-                  className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-300"
+                  className="ui-select rounded-2xl border border-sky-200/18 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-300"
                 >
                   <option value="All">All visa types</option>
                   {visaTypes.map((item) => (
@@ -435,7 +435,7 @@ export function JobsBoard() {
                 <select
                   value={companySize}
                   onChange={(event) => updateCompanySize(event.target.value)}
-                  className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-300"
+                  className="ui-select rounded-2xl border border-sky-200/18 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-300"
                 >
                   <option value="All">All company sizes</option>
                   {companySizes.map((item) => (
@@ -448,7 +448,7 @@ export function JobsBoard() {
             </div>
           </div>
 
-          <div className="mt-8 flex items-center justify-between gap-4">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <div>
               <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
                 {showingLiveResults ? "Verified live results" : "Borderless-ready roles"}
@@ -457,7 +457,7 @@ export function JobsBoard() {
                 {displayJobs.length} {showingLiveResults ? "live roles ready to explore" : "roles worth tracking"}
               </h2>
             </div>
-            <p className="max-w-lg text-right text-sm leading-6 text-slate-500 dark:text-slate-400">
+            <p className="max-w-lg text-sm leading-6 text-slate-500 dark:text-slate-400 sm:text-right">
               Latest live postings are sourced through Exa from Singapore job boards
               such as JobStreet, JobsSG, Indeed, LinkedIn, and MyCareersFuture.
             </p>
@@ -469,7 +469,7 @@ export function JobsBoard() {
             </div>
           ) : null}
 
-          <div className="mt-6 grid gap-5 lg:grid-cols-2">
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
             {isLoading
               ? Array.from({ length: 6 }, (_, index) => (
                   <JobCardSkeleton key={`skeleton-${index}`} />
@@ -586,17 +586,17 @@ export function JobsBoard() {
                           href={job.applyUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+                          className="button-primary"
                         >
                           Apply Now
                         </a>
                       ) : null}
-                      <Link
-                        href={{
-                          pathname: "/interview",
-                          query: { company: job.company }
-                        }}
-                        className="inline-flex items-center justify-center rounded-full border border-sky-300 bg-sky-50 px-5 py-3 text-sm font-semibold text-sky-800 transition hover:bg-sky-100 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200"
+                        <Link
+                          href={{
+                            pathname: "/interview",
+                            query: { company: job.company }
+                          }}
+                        className="button-primary"
                       >
                         Practice Interview
                       </Link>

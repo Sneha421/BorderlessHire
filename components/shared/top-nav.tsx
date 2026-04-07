@@ -91,9 +91,9 @@ export function TopNav() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/88 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-950/82">
-      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-10">
-        <Link href="/" className="flex min-w-0 items-center gap-3">
+    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-[linear-gradient(90deg,rgba(241,245,249,0.92),rgba(219,234,254,0.88),rgba(241,245,249,0.92))] shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-[linear-gradient(90deg,rgba(8,15,32,0.94),rgba(14,30,58,0.92),rgba(8,15,32,0.94))] dark:shadow-[0_10px_30px_rgba(2,6,23,0.45)]">
+      <nav className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-3 px-4 py-2.5 sm:px-5 lg:px-6">
+        <Link href="/" className="flex min-w-0 items-center gap-2.5">
           <LogoMark />
           <div className="min-w-0">
             <p className="truncate text-lg font-semibold tracking-tight text-slate-950 dark:text-slate-50">
@@ -105,23 +105,23 @@ export function TopNav() {
         <div className="flex items-center gap-2">
           <form
             onSubmit={handleSearchSubmit}
-            className="hidden items-center gap-2 md:flex"
+            className="hidden items-center gap-2 lg:flex"
           >
             <input
               value={jobSearch}
               onChange={(event) => setJobSearch(event.target.value)}
               placeholder="Search jobs"
-              className="w-48 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              className="w-44 rounded-full border border-slate-300/80 bg-white/85 px-4 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-700 dark:bg-slate-900/85 dark:text-white"
             />
             <button
               type="submit"
-              className="rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
+              className="button-primary"
             >
               Search Jobs
             </button>
           </form>
 
-          <div className="hidden items-center rounded-lg bg-slate-100 p-1 dark:bg-slate-900 sm:flex">
+          <div className="hidden items-center rounded-full border border-slate-200/80 bg-white/70 p-1 backdrop-blur md:flex dark:border-slate-700/80 dark:bg-slate-900/70">
             {links.map((link) => {
               const isActive =
                 pathname === link.href ||
@@ -131,7 +131,7 @@ export function TopNav() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+                  className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white"
                       : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
@@ -146,7 +146,7 @@ export function TopNav() {
         </div>
       </nav>
 
-      <div className="mx-auto space-y-3 px-4 pb-3 sm:hidden sm:px-6 lg:px-10">
+      <div className="mx-auto max-w-[1600px] space-y-3 px-4 pb-3 md:hidden sm:px-5">
         <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <input
             value={jobSearch}
@@ -156,13 +156,13 @@ export function TopNav() {
           />
           <button
             type="submit"
-            className="rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
+            className="button-primary"
           >
             Search
           </button>
         </form>
 
-        <div className="flex w-full gap-2">
+        <div className="grid w-full grid-cols-2 gap-2">
           {links.map((link) => {
             const isActive =
               pathname === link.href ||
@@ -172,7 +172,7 @@ export function TopNav() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex-1 rounded-full px-4 py-2 text-center text-sm font-semibold transition ${
+                className={`rounded-full px-4 py-2 text-center text-sm font-semibold transition ${
                   isActive
                     ? "bg-sky-600 text-white"
                     : "bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-200"
