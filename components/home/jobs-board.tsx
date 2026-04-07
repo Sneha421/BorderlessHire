@@ -1,19 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import {
-  startTransition,
-  useEffect,
-  useMemo,
-  useState
-} from "react";
+import { useSearchParams } from "next/navigation";
+import { startTransition, useEffect, useMemo, useState } from "react";
 
 import { HeroSection } from "@/components/home/hero-section";
 import { JobCardSkeleton } from "@/components/home/job-card-skeleton";
 import {
+  readCachedLiveJobs,
+  readSavedJobs,
+  toggleSavedJob,
+  writeCachedLiveJobs
+} from "@/lib/local-storage";
+import {
   companySizes,
   industries,
-  jobs,
   matchesSalaryBand,
   salaryBands,
   type JobListing,
@@ -60,68 +61,269 @@ function getInitials(company: string) {
     .toUpperCase();
 }
 
+function matchesSearchText(job: JobListing, normalizedSearch: string) {
+  if (!normalizedSearch) {
+    return true;
+  }
+
+  return [job.title, job.company, job.industry, job.listingSource, job.listingSnippet]
+    .join(" ")
+    .toLowerCase()
+    .includes(normalizedSearch);
+}
+
+function sortJobs(left: JobListing, right: JobListing) {
+  const quotaDelta =
+    Number(right.activeForeignHiringQuota) - Number(left.activeForeignHiringQuota);
+  if (quotaDelta !== 0) {
+    return quotaDelta;
+  }
+
+  const sponsorshipRank: Record<SponsorshipTier, number> = {
+    "Foreigner-Friendly": 0,
+    "Case-by-Case": 1,
+    "Unlikely to Sponsor": 2
+  };
+
+  const sponsorshipDelta =
+    sponsorshipRank[left.sponsorshipTier] - sponsorshipRank[right.sponsorshipTier];
+  if (sponsorshipDelta !== 0) {
+    return sponsorshipDelta;
+  }
+
+  const freshnessDelta =
+    (right.listingFreshnessScore ?? 0) - (left.listingFreshnessScore ?? 0);
+  if (freshnessDelta !== 0) {
+    return freshnessDelta;
+  }
+
+  return right.salaryMax - left.salaryMax;
+}
+
+function filterJobs(
+  boardJobs: JobListing[],
+  options: {
+    industry: string;
+    salaryBand: string;
+    visaType: string;
+    companySize: string;
+    normalizedSearch: string;
+    ignoreIndustry?: boolean;
+    ignoreSalary?: boolean;
+    ignoreVisa?: boolean;
+    ignoreCompanySize?: boolean;
+    ignoreSearch?: boolean;
+  }
+) {
+  return boardJobs
+    .filter((job) => {
+      const industryMatch =
+        options.ignoreIndustry || options.industry === "All" || job.industry === options.industry;
+      const visaMatch =
+        options.ignoreVisa || options.visaType === "All" || job.visaType === options.visaType;
+      const companySizeMatch =
+        options.ignoreCompanySize ||
+        options.companySize === "All" ||
+        job.companySize === options.companySize;
+      const salaryMatch =
+        options.ignoreSalary || matchesSalaryBand(job, options.salaryBand);
+      const searchMatch =
+        options.ignoreSearch || matchesSearchText(job, options.normalizedSearch);
+
+      return (
+        industryMatch &&
+        visaMatch &&
+        companySizeMatch &&
+        salaryMatch &&
+        searchMatch
+      );
+    })
+    .toSorted(sortJobs);
+}
+
 export function JobsBoard() {
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q")?.trim() || "";
+
   const [industry, setIndustry] = useState("All");
   const [salaryBand, setSalaryBand] = useState("any");
   const [visaType, setVisaType] = useState("All");
   const [companySize, setCompanySize] = useState("All");
+  const [boardJobs, setBoardJobs] = useState<JobListing[]>([]);
+  const [boardReason, setBoardReason] = useState<string>("");
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
-  const [portalResults, setPortalResults] = useState<Record<string, PortalResult[]>>(
-    {}
-  );
-  const [loadingPortalsFor, setLoadingPortalsFor] = useState<string | null>(null);
-  const [portalErrorByJob, setPortalErrorByJob] = useState<Record<string, string>>({});
+  useEffect(() => {
+    setSavedJobIds(new Set(readSavedJobs().map((job) => job.id)));
+  }, []);
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => setIsLoading(false), 550);
+    const controller = new AbortController();
 
-    return () => window.clearTimeout(timeout);
-  }, []);
+    async function loadJobs() {
+      setIsLoading(true);
+
+      try {
+        const query = searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : "";
+        const response = await fetch(`/api/jobs${query}`, {
+          signal: controller.signal,
+          cache: "no-store"
+        });
+        const payload = (await response.json()) as {
+          error?: string;
+          jobs?: JobListing[];
+          reason?: string;
+        };
+
+        if (!response.ok || !payload.jobs) {
+          throw new Error(payload.error || "Unable to fetch jobs.");
+        }
+
+        if (payload.jobs.length > 0) {
+          setBoardJobs(payload.jobs);
+          writeCachedLiveJobs(payload.jobs);
+          setBoardReason(payload.reason || "");
+          return;
+        }
+
+        const cachedJobs = readCachedLiveJobs();
+        if (cachedJobs.length > 0) {
+          setBoardJobs(cachedJobs);
+          setBoardReason(
+            "Showing recently verified live roles while the latest refresh catches up."
+          );
+          return;
+        }
+
+        setBoardJobs(payload.jobs);
+        setBoardReason(
+          payload.reason || "Unable to load verified live postings right now."
+        );
+      } catch {
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        const cachedJobs = readCachedLiveJobs();
+        if (cachedJobs.length > 0) {
+          setBoardJobs(cachedJobs);
+          setBoardReason(
+            "Showing recently verified live roles while the live refresh recovers."
+          );
+          return;
+        }
+
+        setBoardJobs([]);
+        setBoardReason("Unable to load verified live postings right now.");
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadJobs();
+
+    return () => controller.abort();
+  }, [searchQuery]);
 
   const featuredCount = useMemo(
     () =>
       new Set(
-        jobs
+        boardJobs
           .filter((job) => job.sponsorshipTier === "Foreigner-Friendly")
           .map((job) => job.company)
       ).size,
-    []
+    [boardJobs]
   );
 
-  const filteredJobs = useMemo(() => {
-    return jobs
-      .filter((job) => {
-        const industryMatch = industry === "All" || job.industry === industry;
-        const visaMatch = visaType === "All" || job.visaType === visaType;
-        const companySizeMatch =
-          companySize === "All" || job.companySize === companySize;
-        const salaryMatch = matchesSalaryBand(job, salaryBand);
+  const { displayJobs, filtersRelaxedMessage, showingLiveResults } = useMemo(() => {
+    if (boardJobs.length === 0) {
+      return {
+        displayJobs: [],
+        filtersRelaxedMessage: "",
+        showingLiveResults: false
+      };
+    }
 
-        return industryMatch && visaMatch && companySizeMatch && salaryMatch;
-      })
-      .toSorted((left, right) => {
-        const quotaDelta =
-          Number(right.activeForeignHiringQuota) -
-          Number(left.activeForeignHiringQuota);
-        if (quotaDelta !== 0) {
-          return quotaDelta;
+    const normalizedSearch = searchQuery.toLowerCase();
+
+    const baseOptions = {
+      industry,
+      salaryBand,
+      visaType,
+      companySize,
+      normalizedSearch
+    };
+    const strictMatches = filterJobs(boardJobs, baseOptions);
+
+    if (strictMatches.length > 0) {
+      return {
+        displayJobs: strictMatches,
+        filtersRelaxedMessage: "",
+        showingLiveResults: true
+      };
+    }
+
+    const relaxationSteps = [
+      {
+        matches: filterJobs(boardJobs, { ...baseOptions, ignoreSalary: true }),
+        message: "Showing the closest live roles after relaxing the salary filter."
+      },
+      {
+        matches: filterJobs(boardJobs, {
+          ...baseOptions,
+          ignoreSalary: true,
+          ignoreCompanySize: true
+        }),
+        message: "Showing the closest live roles after relaxing salary and company-size filters."
+      },
+      {
+        matches: filterJobs(boardJobs, {
+          ...baseOptions,
+          ignoreSalary: true,
+          ignoreCompanySize: true,
+          ignoreVisa: true
+        }),
+        message: "Showing the closest live roles after relaxing salary, company-size, and visa filters."
+      },
+      {
+        matches: filterJobs(boardJobs, {
+          ...baseOptions,
+          ignoreSalary: true,
+          ignoreCompanySize: true,
+          ignoreVisa: true,
+          ignoreIndustry: true
+        }),
+        message: "Showing the closest live roles after broadening your filter set."
+      },
+      {
+        matches: filterJobs(boardJobs, {
+          ...baseOptions,
+          ignoreSalary: true,
+          ignoreCompanySize: true,
+          ignoreVisa: true,
+          ignoreIndustry: true,
+          ignoreSearch: true
+        }),
+        message: "Showing the closest live roles available right now while broadening your filters and search."
+      }
+    ];
+
+    const fallback = relaxationSteps.find((step) => step.matches.length > 0);
+
+    return fallback
+      ? {
+          displayJobs: fallback.matches,
+          filtersRelaxedMessage: fallback.message,
+          showingLiveResults: true
         }
-
-        const sponsorshipRank: Record<SponsorshipTier, number> = {
-          "Foreigner-Friendly": 0,
-          "Case-by-Case": 1,
-          "Unlikely to Sponsor": 2
+      : {
+          displayJobs: [],
+          filtersRelaxedMessage: "",
+          showingLiveResults: false
         };
-
-        const sponsorshipDelta =
-          sponsorshipRank[left.sponsorshipTier] - sponsorshipRank[right.sponsorshipTier];
-        if (sponsorshipDelta !== 0) {
-          return sponsorshipDelta;
-        }
-
-        return right.salaryMax - left.salaryMax;
-      });
-  }, [companySize, industry, salaryBand, visaType]);
+  }, [boardJobs, companySize, industry, salaryBand, searchQuery, visaType]);
 
   function updateIndustry(value: string) {
     startTransition(() => setIndustry(value));
@@ -139,53 +341,16 @@ export function JobsBoard() {
     startTransition(() => setCompanySize(value));
   }
 
-  async function loadPortalResults(job: JobListing) {
-    setLoadingPortalsFor(job.id);
-    setPortalErrorByJob((current) => ({ ...current, [job.id]: "" }));
-
-    try {
-      const response = await fetch("/api/job-links", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          applyUrl: job.applyUrl,
-          company: job.company,
-          title: job.title,
-          query: job.portalSearchQuery
-        })
-      });
-
-      const payload = (await response.json()) as {
-        error?: string;
-        portals?: PortalResult[];
-      };
-
-      if (!response.ok || !payload.portals) {
-        throw new Error(payload.error || "Unable to fetch job boards.");
-      }
-
-      setPortalResults((current) => ({
-        ...current,
-        [job.id]: payload.portals || []
-      }));
-    } catch (error) {
-      setPortalErrorByJob((current) => ({
-        ...current,
-        [job.id]:
-          error instanceof Error ? error.message : "Unable to fetch job boards."
-      }));
-    } finally {
-      setLoadingPortalsFor(null);
-    }
+  function handleToggleSavedJob(job: JobListing) {
+    const next = toggleSavedJob(job);
+    setSavedJobIds(new Set(next.map((savedJob) => savedJob.id)));
   }
 
   return (
     <main className="relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-grid-fade bg-[size:32px_32px] opacity-30" />
       <section className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-7xl flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
-        <HeroSection featuredCount={featuredCount} totalJobs={jobs.length} />
+        <HeroSection featuredCount={featuredCount} totalJobs={boardJobs.length} />
 
         <div className="mt-6 rounded-[2rem] border border-white/70 bg-white/75 p-4 shadow-card backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/70 sm:p-6">
           <div
@@ -286,25 +451,30 @@ export function JobsBoard() {
           <div className="mt-8 flex items-center justify-between gap-4">
             <div>
               <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                Live results
+                {showingLiveResults ? "Verified live results" : "Borderless-ready roles"}
               </p>
               <h2 className="mt-1 text-2xl font-semibold text-ink dark:text-white">
-                {filteredJobs.length} roles match your filters
+                {displayJobs.length} {showingLiveResults ? "live roles ready to explore" : "roles worth tracking"}
               </h2>
             </div>
             <p className="max-w-lg text-right text-sm leading-6 text-slate-500 dark:text-slate-400">
-              Companies with active foreign hiring signals are surfaced first. FCF
-              is highlighted when the employer is large enough that the framework is
-              likely relevant.
+              Latest live postings are sourced through Exa from Singapore job boards
+              such as JobStreet, JobsSG, Indeed, LinkedIn, and MyCareersFuture.
             </p>
           </div>
+
+          {!isLoading && filtersRelaxedMessage ? (
+            <div className="mt-4 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100">
+              {filtersRelaxedMessage}
+            </div>
+          ) : null}
 
           <div className="mt-6 grid gap-5 lg:grid-cols-2">
             {isLoading
               ? Array.from({ length: 6 }, (_, index) => (
                   <JobCardSkeleton key={`skeleton-${index}`} />
                 ))
-              : filteredJobs.map((job) => (
+              : displayJobs.map((job) => (
                   <article
                     key={job.id}
                     className="group rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-card dark:border-slate-800 dark:bg-slate-900 [content-visibility:auto] [contain-intrinsic-size:0_520px]"
@@ -323,6 +493,16 @@ export function JobsBoard() {
                           {job.activeForeignHiringQuota ? (
                             <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-200">
                               Active foreign hiring
+                            </span>
+                          ) : null}
+                          {job.listingSource ? (
+                            <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                              {job.listingSource}
+                            </span>
+                          ) : null}
+                          {job.listingRecency ? (
+                            <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-200">
+                              {job.listingRecency}
                             </span>
                           ) : null}
                         </div>
@@ -396,78 +576,55 @@ export function JobsBoard() {
                     </div>
 
                     <p className="mt-5 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      {job.listingSnippet ? `${job.listingSnippet} ` : ""}
                       {job.sponsorshipNote}
                     </p>
 
                     <div className="mt-6 flex flex-wrap items-center gap-3">
+                      {job.isLivePosting ? (
+                        <a
+                          href={job.applyUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+                        >
+                          Apply Now
+                        </a>
+                      ) : null}
                       <Link
                         href={{
                           pathname: "/interview",
                           query: { company: job.company }
                         }}
-                        className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+                        className="inline-flex items-center justify-center rounded-full border border-sky-300 bg-sky-50 px-5 py-3 text-sm font-semibold text-sky-800 transition hover:bg-sky-100 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200"
                       >
                         Practice Interview
                       </Link>
-                      <a
-                        href={job.applyUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center justify-center rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                      >
-                        Apply Now
-                      </a>
                       <button
                         type="button"
-                        onClick={() => loadPortalResults(job)}
-                        disabled={loadingPortalsFor === job.id}
-                        className="inline-flex items-center justify-center rounded-full border border-sky-300 bg-sky-50 px-5 py-3 text-sm font-semibold text-sky-800 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-70 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200"
+                        onClick={() => handleToggleSavedJob(job)}
+                        className={`inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition ${
+                          savedJobIds.has(job.id)
+                            ? "border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200"
+                            : "border border-slate-300 text-slate-700 hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                        }`}
                       >
-                        {loadingPortalsFor === job.id
-                          ? "Searching portals..."
-                          : "Search Job Boards"}
+                        {savedJobIds.has(job.id) ? "Saved" : "Save Job"}
                       </button>
                     </div>
 
-                    {portalErrorByJob[job.id] ? (
-                      <p className="mt-3 text-sm text-rose-700 dark:text-rose-300">
-                        {portalErrorByJob[job.id]}
-                      </p>
-                    ) : null}
-
-                    {portalResults[job.id]?.length ? (
-                      <div className="mt-4 rounded-[1.5rem] bg-slate-50 p-4 dark:bg-slate-800/60">
-                        <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                          Live apply portals
-                        </p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {portalResults[job.id].map((portal) => (
-                            <a
-                              key={`${job.id}-${portal.url}`}
-                              href={portal.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex rounded-full border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                              title={portal.snippet}
-                            >
-                              Apply on {portal.source}
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null}
                   </article>
                 ))}
           </div>
 
-          {!isLoading && filteredJobs.length === 0 ? (
+          {!isLoading && displayJobs.length === 0 ? (
             <div className="mt-8 rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 p-8 text-center dark:border-slate-700 dark:bg-slate-900">
               <p className="text-lg font-semibold text-ink dark:text-white">
-                No roles match those filters.
+                Live postings are being refreshed.
               </p>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                Widen the salary band or company-size filter to see more
-                sponsor-friendly openings.
+                {boardReason ||
+                  "Only current postings with direct vacancy links are shown. Refresh in a moment while the Singapore job boards finish syncing."}
               </p>
             </div>
           ) : null}

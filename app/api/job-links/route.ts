@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 
-import { searchJobPortals } from "@/lib/apify";
+import { searchJobPortals } from "@/lib/exa";
 
 export const runtime = "nodejs";
 

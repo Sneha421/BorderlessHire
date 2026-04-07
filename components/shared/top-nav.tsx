@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import type { Route } from "next";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 
@@ -74,6 +75,20 @@ function LogoMark() {
 
 export function TopNav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [jobSearch, setJobSearch] = useState(searchParams.get("q") ?? "");
+
+  useEffect(() => {
+    setJobSearch(searchParams.get("q") ?? "");
+  }, [searchParams]);
+
+  function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const query = jobSearch.trim();
+
+    router.push(query ? `/?q=${encodeURIComponent(query)}#job-filters` : "/#job-filters");
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/88 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-950/82">
@@ -88,6 +103,24 @@ export function TopNav() {
         </Link>
 
         <div className="flex items-center gap-2">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="hidden items-center gap-2 md:flex"
+          >
+            <input
+              value={jobSearch}
+              onChange={(event) => setJobSearch(event.target.value)}
+              placeholder="Search jobs"
+              className="w-48 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+            />
+            <button
+              type="submit"
+              className="rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
+            >
+              Search Jobs
+            </button>
+          </form>
+
           <div className="hidden items-center rounded-lg bg-slate-100 p-1 dark:bg-slate-900 sm:flex">
             {links.map((link) => {
               const isActive =
@@ -113,26 +146,43 @@ export function TopNav() {
         </div>
       </nav>
 
-      <div className="mx-auto flex w-full max-w-7xl gap-2 px-4 pb-3 sm:hidden sm:px-6 lg:px-10">
-        {links.map((link) => {
-          const isActive =
-            pathname === link.href ||
-            (link.href !== "/" && pathname.startsWith(link.href));
+      <div className="mx-auto space-y-3 px-4 pb-3 sm:hidden sm:px-6 lg:px-10">
+        <form onSubmit={handleSearchSubmit} className="flex gap-2">
+          <input
+            value={jobSearch}
+            onChange={(event) => setJobSearch(event.target.value)}
+            placeholder="Search jobs"
+            className="min-w-0 flex-1 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-400 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+          />
+          <button
+            type="submit"
+            className="rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
+          >
+            Search
+          </button>
+        </form>
 
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`flex-1 rounded-full px-4 py-2 text-center text-sm font-semibold transition ${
-                isActive
-                  ? "bg-sky-600 text-white"
-                  : "bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-200"
-              }`}
-            >
-              {link.label}
-            </Link>
-          );
-        })}
+        <div className="flex w-full gap-2">
+          {links.map((link) => {
+            const isActive =
+              pathname === link.href ||
+              (link.href !== "/" && pathname.startsWith(link.href));
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`flex-1 rounded-full px-4 py-2 text-center text-sm font-semibold transition ${
+                  isActive
+                    ? "bg-sky-600 text-white"
+                    : "bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </header>
   );
