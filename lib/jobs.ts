@@ -1,5 +1,17 @@
-export type SponsorshipLikelihood = "High" | "Medium" | "Low";
+export type SponsorshipTier =
+  | "Foreigner-Friendly"
+  | "Case-by-Case"
+  | "Unlikely to Sponsor";
 export type JobType = "Full-time" | "Contract";
+export type VisaType = "EP" | "S Pass" | "EP / S Pass";
+export type CompanySize = "Startup (<=25)" | "SME (26-200)" | "Large (200+)";
+
+export type SalaryBand = {
+  id: string;
+  label: string;
+  min: number;
+  max: number | null;
+};
 
 export type JobListing = {
   id: string;
@@ -8,15 +20,23 @@ export type JobListing = {
   industry: "Tech" | "Finance" | "Consulting" | "Healthcare" | "Government-linked";
   salaryMin: number;
   salaryMax: number;
-  sponsorshipLikelihood: SponsorshipLikelihood;
+  sponsorshipTier: SponsorshipTier;
   sponsorshipNote: string;
   compassPoints: number;
   jobType: JobType;
   requiresDegree: boolean;
-  linkedinUrl: string;
+  visaType: VisaType;
+  companySize: CompanySize;
+  employeeCount: number;
+  activeForeignHiringQuota: boolean;
+  fairConsiderationFramework: boolean;
+  applyUrl: string;
+  portalSearchQuery: string;
 };
 
-export const jobs: JobListing[] = [
+type JobSeed = Omit<JobListing, "fairConsiderationFramework" | "portalSearchQuery">;
+
+const jobSeeds: JobSeed[] = [
   {
     id: "grab-product-analyst",
     title: "Product Analyst",
@@ -24,12 +44,16 @@ export const jobs: JobListing[] = [
     industry: "Tech",
     salaryMin: 6200,
     salaryMax: 8200,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "Grab regularly sponsors Employment Pass hires across product and data teams.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "Regional product and analytics hiring at Grab has a strong record of sponsoring EP candidates.",
     compassPoints: 15,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/grabapp/jobs/"
+    visaType: "EP / S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 3500,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://grab.careers/"
   },
   {
     id: "grab-software-engineer",
@@ -38,12 +62,16 @@ export const jobs: JobListing[] = [
     industry: "Tech",
     salaryMin: 7000,
     salaryMax: 9800,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "Regional engineering roles at Grab commonly support EP applications for specialized talent.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "Grab platform teams routinely hire specialized engineering talent from abroad.",
     compassPoints: 17,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/grabapp/jobs/"
+    visaType: "EP",
+    companySize: "Large (200+)",
+    employeeCount: 3500,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://grab.careers/"
   },
   {
     id: "sea-risk-analyst",
@@ -52,12 +80,16 @@ export const jobs: JobListing[] = [
     industry: "Tech",
     salaryMin: 5600,
     salaryMax: 7600,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "Sea's Singapore HQ frequently hires international graduates into analyst tracks.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "Sea's Singapore HQ has a long track record of regional analyst hiring and sponsorship support.",
     compassPoints: 14,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/sea-limited/jobs/"
+    visaType: "EP / S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 5000,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://www.sea.com/careers"
   },
   {
     id: "shopee-bizops",
@@ -66,12 +98,16 @@ export const jobs: JobListing[] = [
     industry: "Tech",
     salaryMin: 4800,
     salaryMax: 6500,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "Shopee has a track record of sponsoring high-potential regional hires in SG.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "Shopee remains open to international early-career talent in cross-border operations roles.",
     compassPoints: 12,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/shopee/jobs/"
+    visaType: "S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 4000,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://careers.shopee.sg/jobs"
   },
   {
     id: "bytedance-data-scientist",
@@ -80,12 +116,16 @@ export const jobs: JobListing[] = [
     industry: "Tech",
     salaryMin: 8000,
     salaryMax: 11000,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "ByteDance Singapore sponsors niche data and recommendation-system talent at scale.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "ByteDance Singapore regularly sponsors niche machine learning and recommendation talent.",
     compassPoints: 18,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/bytedance/jobs/"
+    visaType: "EP",
+    companySize: "Large (200+)",
+    employeeCount: 2500,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://jobs.bytedance.com/en"
   },
   {
     id: "google-cloud-consultant",
@@ -94,12 +134,16 @@ export const jobs: JobListing[] = [
     industry: "Tech",
     salaryMin: 9000,
     salaryMax: 13000,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "Google Singapore consistently sponsors EPs for technical customer-facing roles.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "Google Singapore commonly sponsors technical customer-facing roles with strong specialization.",
     compassPoints: 19,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/google/jobs/"
+    visaType: "EP",
+    companySize: "Large (200+)",
+    employeeCount: 2000,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://www.google.com/about/careers/applications/jobs/results/?location=Singapore"
   },
   {
     id: "dbs-aml-analyst",
@@ -108,12 +152,16 @@ export const jobs: JobListing[] = [
     industry: "Finance",
     salaryMin: 5200,
     salaryMax: 6900,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "Large Singapore banks such as DBS routinely sponsor specialized compliance and tech talent.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "DBS routinely hires international candidates into specialist compliance and analytics tracks.",
     compassPoints: 13,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/dbs-bank/jobs/"
+    visaType: "EP / S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 12000,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://www.dbs.com/careers"
   },
   {
     id: "dbs-data-engineer",
@@ -122,12 +170,16 @@ export const jobs: JobListing[] = [
     industry: "Finance",
     salaryMin: 7000,
     salaryMax: 9200,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "DBS tech transformation teams are accustomed to international hiring in Singapore.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "DBS tech transformation programs are comfortable sponsoring international engineering talent.",
     compassPoints: 16,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/dbs-bank/jobs/"
+    visaType: "EP",
+    companySize: "Large (200+)",
+    employeeCount: 12000,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://www.dbs.com/careers"
   },
   {
     id: "uob-product-manager",
@@ -136,12 +188,16 @@ export const jobs: JobListing[] = [
     industry: "Finance",
     salaryMin: 6800,
     salaryMax: 9000,
-    sponsorshipLikelihood: "Medium",
-    sponsorshipNote: "UOB sponsors selectively, especially for digital banking roles with regional exposure.",
+    sponsorshipTier: "Case-by-Case",
+    sponsorshipNote: "UOB sponsors selectively when candidates bring regional digital banking or platform experience.",
     compassPoints: 14,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/uob/jobs/"
+    visaType: "EP",
+    companySize: "Large (200+)",
+    employeeCount: 8000,
+    activeForeignHiringQuota: false,
+    applyUrl: "https://www.uobgroup.com/uobgroup/careers/index.page"
   },
   {
     id: "standard-chartered-analyst",
@@ -150,12 +206,16 @@ export const jobs: JobListing[] = [
     industry: "Finance",
     salaryMin: 6300,
     salaryMax: 8400,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "Standard Chartered's Singapore base often sponsors graduate and analyst hires.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "Standard Chartered Singapore has recurring analyst and graduate openings open to international talent.",
     compassPoints: 15,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/standard-chartered-bank/jobs/"
+    visaType: "EP",
+    companySize: "Large (200+)",
+    employeeCount: 9000,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://www.sc.com/en/global-careers/"
   },
   {
     id: "ocbc-risk-manager",
@@ -164,12 +224,16 @@ export const jobs: JobListing[] = [
     industry: "Finance",
     salaryMin: 5100,
     salaryMax: 6800,
-    sponsorshipLikelihood: "Medium",
-    sponsorshipNote: "OCBC tends to sponsor when candidates bring quantitative or regulatory specialization.",
+    sponsorshipTier: "Case-by-Case",
+    sponsorshipNote: "OCBC tends to sponsor when the candidate has clear quantitative or regulatory niche value.",
     compassPoints: 12,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/ocbc-bank/jobs/"
+    visaType: "EP / S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 9000,
+    activeForeignHiringQuota: false,
+    applyUrl: "https://www.ocbc.com/group/careers"
   },
   {
     id: "mckinsey-ba",
@@ -178,12 +242,16 @@ export const jobs: JobListing[] = [
     industry: "Consulting",
     salaryMin: 7800,
     salaryMax: 9800,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "Top consulting firms regularly sponsor EPs for globally mobile consultants.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "Global consulting firms in Singapore regularly sponsor internationally mobile consultants.",
     compassPoints: 17,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/mckinsey/jobs/"
+    visaType: "EP",
+    companySize: "Large (200+)",
+    employeeCount: 1000,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://www.mckinsey.com/careers/search-jobs"
   },
   {
     id: "bcg-associate",
@@ -192,12 +260,16 @@ export const jobs: JobListing[] = [
     industry: "Consulting",
     salaryMin: 7600,
     salaryMax: 9800,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "BCG Singapore routinely relocates and sponsors early-career strategy talent.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "BCG Singapore frequently sponsors early-career strategy hires with strong academic profiles.",
     compassPoints: 17,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/boston-consulting-group/jobs/"
+    visaType: "EP",
+    companySize: "Large (200+)",
+    employeeCount: 1000,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://careers.bcg.com/global/en/search-results"
   },
   {
     id: "accenture-cloud-analyst",
@@ -206,12 +278,16 @@ export const jobs: JobListing[] = [
     industry: "Consulting",
     salaryMin: 5000,
     salaryMax: 6900,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "Accenture Singapore has established work-pass processes for client delivery talent.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "Accenture Singapore has mature work-pass processes for client-facing transformation roles.",
     compassPoints: 13,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/accenture/jobs/"
+    visaType: "EP / S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 6000,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://www.accenture.com/sg-en/careers/jobsearch"
   },
   {
     id: "ey-tech-consultant",
@@ -220,12 +296,16 @@ export const jobs: JobListing[] = [
     industry: "Consulting",
     salaryMin: 4700,
     salaryMax: 6200,
-    sponsorshipLikelihood: "Medium",
-    sponsorshipNote: "Big Four firms sponsor, but offer rates and specialization drive approval odds.",
+    sponsorshipTier: "Case-by-Case",
+    sponsorshipNote: "Big Four sponsorship is possible, but offer level and specialization matter more than title alone.",
     compassPoints: 11,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/ernstandyoung/jobs/"
+    visaType: "S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 3000,
+    activeForeignHiringQuota: false,
+    applyUrl: "https://careers.ey.com"
   },
   {
     id: "kpmg-cyber-analyst",
@@ -234,12 +314,16 @@ export const jobs: JobListing[] = [
     industry: "Consulting",
     salaryMin: 4800,
     salaryMax: 6500,
-    sponsorshipLikelihood: "Medium",
-    sponsorshipNote: "KPMG Singapore sponsors more readily for cyber and data-risk roles than generalist posts.",
+    sponsorshipTier: "Case-by-Case",
+    sponsorshipNote: "KPMG is more likely to sponsor cyber and data-risk roles than generalist consulting openings.",
     compassPoints: 12,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/kpmg/jobs/"
+    visaType: "S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 3000,
+    activeForeignHiringQuota: false,
+    applyUrl: "https://kpmg.com/sg/en/home/careers.html"
   },
   {
     id: "singhealth-data-analyst",
@@ -248,12 +332,16 @@ export const jobs: JobListing[] = [
     industry: "Healthcare",
     salaryMin: 4600,
     salaryMax: 6100,
-    sponsorshipLikelihood: "Medium",
-    sponsorshipNote: "Public healthcare groups sponsor selectively for analytics and clinical informatics roles.",
+    sponsorshipTier: "Case-by-Case",
+    sponsorshipNote: "Public healthcare groups sponsor selectively for analytics, informatics, and domain-heavy functions.",
     compassPoints: 10,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/singhealth/jobs/"
+    visaType: "S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 15000,
+    activeForeignHiringQuota: false,
+    applyUrl: "https://careers.singhealth.com.sg"
   },
   {
     id: "singhealth-project-manager",
@@ -262,12 +350,16 @@ export const jobs: JobListing[] = [
     industry: "Healthcare",
     salaryMin: 5800,
     salaryMax: 7600,
-    sponsorshipLikelihood: "Medium",
-    sponsorshipNote: "Operational transformation roles can qualify when tied to scarce domain capability.",
+    sponsorshipTier: "Case-by-Case",
+    sponsorshipNote: "Project-based transformation roles can justify sponsorship when tied to scarce healthcare operations expertise.",
     compassPoints: 12,
     jobType: "Contract",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/singhealth/jobs/"
+    visaType: "EP",
+    companySize: "Large (200+)",
+    employeeCount: 15000,
+    activeForeignHiringQuota: false,
+    applyUrl: "https://careers.singhealth.com.sg"
   },
   {
     id: "raffles-ops-executive",
@@ -276,12 +368,16 @@ export const jobs: JobListing[] = [
     industry: "Healthcare",
     salaryMin: 3900,
     salaryMax: 5200,
-    sponsorshipLikelihood: "Low",
-    sponsorshipNote: "Private healthcare operators usually reserve sponsorship for more specialized functions.",
+    sponsorshipTier: "Unlikely to Sponsor",
+    sponsorshipNote: "Private healthcare operators usually reserve sponsorship for more specialized clinical or niche corporate functions.",
     compassPoints: 8,
     jobType: "Full-time",
     requiresDegree: false,
-    linkedinUrl: "https://www.linkedin.com/company/raffles-medical-group/jobs/"
+    visaType: "S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 1800,
+    activeForeignHiringQuota: false,
+    applyUrl: "https://www.rafflesmedicalgroup.com/careers/"
   },
   {
     id: "ihh-business-analyst",
@@ -290,12 +386,16 @@ export const jobs: JobListing[] = [
     industry: "Healthcare",
     salaryMin: 4300,
     salaryMax: 5600,
-    sponsorshipLikelihood: "Low",
-    sponsorshipNote: "Sponsorship is possible but less common for general corporate healthcare roles.",
+    sponsorshipTier: "Unlikely to Sponsor",
+    sponsorshipNote: "Sponsorship is less common for generalist corporate healthcare roles without scarce skill signals.",
     compassPoints: 9,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/ihh-healthcare/jobs/"
+    visaType: "S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 1200,
+    activeForeignHiringQuota: false,
+    applyUrl: "https://careers.ihhhealthcare.com"
   },
   {
     id: "gic-investment-analyst",
@@ -304,12 +404,16 @@ export const jobs: JobListing[] = [
     industry: "Government-linked",
     salaryMin: 8200,
     salaryMax: 11500,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "GIC hires globally and has robust sponsorship pathways for investment talent.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "GIC hires globally and supports sponsorship for high-caliber investment and research talent.",
     compassPoints: 18,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/gic/jobs/"
+    visaType: "EP",
+    companySize: "Large (200+)",
+    employeeCount: 1800,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://careers.gic.com.sg"
   },
   {
     id: "temasek-data-analyst",
@@ -318,12 +422,16 @@ export const jobs: JobListing[] = [
     industry: "Government-linked",
     salaryMin: 7200,
     salaryMax: 9800,
-    sponsorshipLikelihood: "High",
-    sponsorshipNote: "Temasek sponsors for strategic and data-intensive roles with regional responsibility.",
+    sponsorshipTier: "Foreigner-Friendly",
+    sponsorshipNote: "Temasek sponsors selectively, but data and investment-adjacent roles remain open to international profiles.",
     compassPoints: 16,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/temasek/jobs/"
+    visaType: "EP",
+    companySize: "Large (200+)",
+    employeeCount: 900,
+    activeForeignHiringQuota: true,
+    applyUrl: "https://www.temasek.com.sg/en/careers"
   },
   {
     id: "st-engineering-ai-engineer",
@@ -332,12 +440,16 @@ export const jobs: JobListing[] = [
     industry: "Government-linked",
     salaryMin: 6200,
     salaryMax: 8200,
-    sponsorshipLikelihood: "Medium",
-    sponsorshipNote: "Government-linked firms sponsor selectively in high-skill engineering tracks.",
+    sponsorshipTier: "Case-by-Case",
+    sponsorshipNote: "Government-linked employers sponsor most readily in high-skill engineering tracks tied to strategic projects.",
     compassPoints: 14,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/st-engineering/jobs/"
+    visaType: "EP",
+    companySize: "Large (200+)",
+    employeeCount: 9000,
+    activeForeignHiringQuota: false,
+    applyUrl: "https://careers.stengg.com"
   },
   {
     id: "enterprise-singapore-manager",
@@ -346,12 +458,16 @@ export const jobs: JobListing[] = [
     industry: "Government-linked",
     salaryMin: 5000,
     salaryMax: 6800,
-    sponsorshipLikelihood: "Low",
-    sponsorshipNote: "Public-sector adjacent roles often prioritize local eligibility before sponsorship.",
+    sponsorshipTier: "Unlikely to Sponsor",
+    sponsorshipNote: "Public-sector adjacent roles usually prioritize locally eligible applicants before sponsorship is considered.",
     compassPoints: 9,
     jobType: "Contract",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/enterprise-singapore/jobs/"
+    visaType: "S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 600,
+    activeForeignHiringQuota: false,
+    applyUrl: "https://www.enterprisesg.gov.sg/careers"
   },
   {
     id: "ncs-software-engineer",
@@ -360,13 +476,51 @@ export const jobs: JobListing[] = [
     industry: "Government-linked",
     salaryMin: 4800,
     salaryMax: 6500,
-    sponsorshipLikelihood: "Medium",
-    sponsorshipNote: "NCS sponsors for delivery roles when projects require niche engineering experience.",
+    sponsorshipTier: "Case-by-Case",
+    sponsorshipNote: "NCS sponsors when delivery teams need niche engineering experience that is hard to source locally.",
     compassPoints: 11,
     jobType: "Full-time",
     requiresDegree: true,
-    linkedinUrl: "https://www.linkedin.com/company/ncs-group/jobs/"
+    visaType: "EP / S Pass",
+    companySize: "Large (200+)",
+    employeeCount: 12000,
+    activeForeignHiringQuota: false,
+    applyUrl: "https://www.ncs.co/en-sg/careers/"
   }
 ];
 
+export const jobs: JobListing[] = jobSeeds.map((job) => ({
+  ...job,
+  fairConsiderationFramework: job.employeeCount > 25,
+  portalSearchQuery: `${job.title} ${job.company} Singapore apply jobs`
+}));
+
 export const industries = Array.from(new Set(jobs.map((job) => job.industry)));
+export const visaTypes = Array.from(new Set(jobs.map((job) => job.visaType)));
+export const companySizes = Array.from(new Set(jobs.map((job) => job.companySize)));
+
+export const salaryBands: SalaryBand[] = [
+  { id: "any", label: "Any salary", min: 0, max: null },
+  { id: "below-5k", label: "Below SGD 5k", min: 0, max: 4999 },
+  { id: "5k-7k", label: "SGD 5k - 7k", min: 5000, max: 7000 },
+  { id: "7k-9k", label: "SGD 7k - 9k", min: 7001, max: 9000 },
+  { id: "9k-plus", label: "SGD 9k+", min: 9001, max: null }
+];
+
+export function matchesSalaryBand(job: JobListing, selectedBandId: string) {
+  if (selectedBandId === "any") {
+    return true;
+  }
+
+  const selectedBand = salaryBands.find((band) => band.id === selectedBandId);
+
+  if (!selectedBand) {
+    return true;
+  }
+
+  const withinUpperBound =
+    selectedBand.max === null || job.salaryMin <= selectedBand.max;
+  const withinLowerBound = job.salaryMax >= selectedBand.min;
+
+  return withinLowerBound && withinUpperBound;
+}

@@ -6,7 +6,8 @@ BorderlessHire is a two-part Next.js app for international students in Singapore
 
 1. Install dependencies with `npm install`.
 2. Copy `.env.example` to `.env.local` and add your `OPENAI_API_KEY`.
-3. Start the app with `npm run dev`, or build it for production with `npm run build`.
+3. Add your `APIFY_API_TOKEN` if you want live portal discovery from job-board search results. Without it, the board still falls back to direct company-careers apply links.
+4. Start the app with `npm run dev`, or build it for production with `npm run build`.
 
 ## COMPASS explainer
 

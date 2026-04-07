@@ -1,18 +1,48 @@
 "use client";
 
 import Link from "next/link";
-import { startTransition, useEffect, useMemo, useState } from "react";
+import {
+  startTransition,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 
+import { HeroSection } from "@/components/home/hero-section";
+import { JobPostingAnalyzer } from "@/components/home/job-posting-analyzer";
 import { JobCardSkeleton } from "@/components/home/job-card-skeleton";
-import { industries, jobs, type JobListing, type SponsorshipLikelihood } from "@/lib/jobs";
+import {
+  companySizes,
+  industries,
+  jobs,
+  matchesSalaryBand,
+  salaryBands,
+  type JobListing,
+  type SponsorshipTier,
+  visaTypes
+} from "@/lib/jobs";
 
-const sponsorshipStyles: Record<SponsorshipLikelihood, string> = {
-  High: "bg-blue-100 text-blue-900 ring-blue-200 dark:bg-blue-500/15 dark:text-blue-200 dark:ring-blue-400/30",
-  Medium: "bg-sky-100 text-sky-900 ring-sky-200 dark:bg-sky-500/15 dark:text-sky-200 dark:ring-sky-400/30",
-  Low: "bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-700/40 dark:text-slate-200 dark:ring-slate-600"
+type PortalResult = {
+  title: string;
+  url: string;
+  source: string;
+  snippet: string;
 };
 
-const minSalaryOptions = [0, 4000, 5000, 6000, 7000, 8000];
+const sponsorshipStyles: Record<SponsorshipTier, string> = {
+  "Foreigner-Friendly":
+    "bg-blue-100 text-blue-900 ring-blue-200 dark:bg-blue-500/15 dark:text-blue-200 dark:ring-blue-400/30",
+  "Case-by-Case":
+    "bg-amber-100 text-amber-900 ring-amber-200 dark:bg-amber-500/15 dark:text-amber-100 dark:ring-amber-400/30",
+  "Unlikely to Sponsor":
+    "bg-rose-100 text-rose-900 ring-rose-200 dark:bg-rose-500/15 dark:text-rose-100 dark:ring-rose-400/30"
+};
+
+const sponsorshipIcons: Record<SponsorshipTier, string> = {
+  "Foreigner-Friendly": "🟢",
+  "Case-by-Case": "🟡",
+  "Unlikely to Sponsor": "🔴"
+};
 
 function formatSalary(value: number) {
   return new Intl.NumberFormat("en-SG", {
@@ -31,25 +61,17 @@ function getInitials(company: string) {
     .toUpperCase();
 }
 
-function matchesFilters(
-  job: JobListing,
-  industry: string,
-  sponsorship: string,
-  minSalary: number
-) {
-  const industryMatch = industry === "All" || job.industry === industry;
-  const sponsorshipMatch =
-    sponsorship === "All" || job.sponsorshipLikelihood === sponsorship;
-  const salaryMatch = job.salaryMin >= minSalary;
-
-  return industryMatch && sponsorshipMatch && salaryMatch;
-}
-
 export function JobsBoard() {
   const [industry, setIndustry] = useState("All");
-  const [sponsorship, setSponsorship] = useState("All");
-  const [minSalary, setMinSalary] = useState(0);
+  const [salaryBand, setSalaryBand] = useState("any");
+  const [visaType, setVisaType] = useState("All");
+  const [companySize, setCompanySize] = useState("All");
   const [isLoading, setIsLoading] = useState(true);
+  const [portalResults, setPortalResults] = useState<Record<string, PortalResult[]>>(
+    {}
+  );
+  const [loadingPortalsFor, setLoadingPortalsFor] = useState<string | null>(null);
+  const [portalErrorByJob, setPortalErrorByJob] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setIsLoading(false), 550);
@@ -61,77 +83,135 @@ export function JobsBoard() {
     () =>
       new Set(
         jobs
-          .filter((job) => job.sponsorshipLikelihood === "High")
+          .filter((job) => job.sponsorshipTier === "Foreigner-Friendly")
           .map((job) => job.company)
       ).size,
     []
   );
 
-  const filteredJobs = useMemo(
-    () =>
-      jobs.filter((job) =>
-        matchesFilters(job, industry, sponsorship, minSalary)
-      ),
-    [industry, sponsorship, minSalary]
-  );
+  const filteredJobs = useMemo(() => {
+    return jobs
+      .filter((job) => {
+        const industryMatch = industry === "All" || job.industry === industry;
+        const visaMatch = visaType === "All" || job.visaType === visaType;
+        const companySizeMatch =
+          companySize === "All" || job.companySize === companySize;
+        const salaryMatch = matchesSalaryBand(job, salaryBand);
+
+        return industryMatch && visaMatch && companySizeMatch && salaryMatch;
+      })
+      .toSorted((left, right) => {
+        const quotaDelta =
+          Number(right.activeForeignHiringQuota) -
+          Number(left.activeForeignHiringQuota);
+        if (quotaDelta !== 0) {
+          return quotaDelta;
+        }
+
+        const sponsorshipRank: Record<SponsorshipTier, number> = {
+          "Foreigner-Friendly": 0,
+          "Case-by-Case": 1,
+          "Unlikely to Sponsor": 2
+        };
+
+        const sponsorshipDelta =
+          sponsorshipRank[left.sponsorshipTier] - sponsorshipRank[right.sponsorshipTier];
+        if (sponsorshipDelta !== 0) {
+          return sponsorshipDelta;
+        }
+
+        return right.salaryMax - left.salaryMax;
+      });
+  }, [companySize, industry, salaryBand, visaType]);
 
   function updateIndustry(value: string) {
     startTransition(() => setIndustry(value));
   }
 
-  function updateSponsorship(value: string) {
-    startTransition(() => setSponsorship(value));
+  function updateSalaryBand(value: string) {
+    startTransition(() => setSalaryBand(value));
   }
 
-  function updateMinSalary(value: number) {
-    startTransition(() => setMinSalary(value));
+  function updateVisaType(value: string) {
+    startTransition(() => setVisaType(value));
+  }
+
+  function updateCompanySize(value: string) {
+    startTransition(() => setCompanySize(value));
+  }
+
+  async function loadPortalResults(job: JobListing) {
+    setLoadingPortalsFor(job.id);
+    setPortalErrorByJob((current) => ({ ...current, [job.id]: "" }));
+
+    try {
+      const response = await fetch("/api/job-links", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          applyUrl: job.applyUrl,
+          company: job.company,
+          title: job.title,
+          query: job.portalSearchQuery
+        })
+      });
+
+      const payload = (await response.json()) as {
+        error?: string;
+        portals?: PortalResult[];
+      };
+
+      if (!response.ok || !payload.portals) {
+        throw new Error(payload.error || "Unable to fetch job boards.");
+      }
+
+      setPortalResults((current) => ({
+        ...current,
+        [job.id]: payload.portals || []
+      }));
+    } catch (error) {
+      setPortalErrorByJob((current) => ({
+        ...current,
+        [job.id]:
+          error instanceof Error ? error.message : "Unable to fetch job boards."
+      }));
+    } finally {
+      setLoadingPortalsFor(null);
+    }
   }
 
   return (
     <main className="relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-grid-fade bg-[size:32px_32px] opacity-30" />
       <section className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-7xl flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
-        <div className="rounded-[2rem] border border-white/70 bg-white/75 p-4 shadow-card backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/70 sm:p-6">
-          <div className="flex flex-col gap-5 border-b border-slate-200/80 pb-6 dark:border-slate-800">
-            <div className="inline-flex w-fit items-center rounded-full bg-emerald-100 px-4 py-2 font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-emerald-900">
-              🟢 {featuredCount} companies actively sponsoring EPs right now
-            </div>
-            <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr] lg:items-end">
-              <div className="space-y-4">
-                <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
-                  borderlessHire / Singapore
-                </p>
-                <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-ink dark:text-white sm:text-5xl">
-                  Sponsor-friendly roles for international students planning their
-                  first Singapore career move.
-                </h1>
-                <p className="max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300 sm:text-lg">
-                  Filter curated openings by industry, salary floor, and visa
-                  friendliness. Each role includes a rough COMPASS contribution and
-                  a direct bridge into company-specific interview practice.
-                </p>
-              </div>
-              <div className="rounded-[1.75rem] border border-slate-200 bg-blue-50/80 p-5 dark:border-slate-800 dark:bg-slate-900">
-                <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                  What this board optimizes for
-                </p>
-                <div className="mt-4 grid gap-3 text-sm text-slate-700 dark:text-slate-300">
-                  <div className="rounded-2xl bg-white/80 p-3 dark:bg-slate-800">
-                    Large employers with known Singapore sponsorship patterns
-                  </div>
-                  <div className="rounded-2xl bg-white/80 p-3 dark:bg-slate-800">
-                    Salary ranges that better support EP eligibility
-                  </div>
-                  <div className="rounded-2xl bg-white/80 p-3 dark:bg-slate-800">
-                    Fast handoff into interview prep for each target company
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <HeroSection featuredCount={featuredCount} totalJobs={jobs.length} />
+        <JobPostingAnalyzer />
 
-          <div className="mt-6 rounded-[1.75rem] border border-slate-200 bg-slate-950 px-5 py-5 text-white dark:border-slate-800">
-            <div className="grid gap-4 md:grid-cols-3">
+        <div className="mt-6 rounded-[2rem] border border-white/70 bg-white/75 p-4 shadow-card backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/70 sm:p-6">
+          <div
+            id="job-filters"
+            className="rounded-[1.75rem] border border-slate-200 bg-slate-950 px-5 py-5 text-white dark:border-slate-800"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              {(
+                [
+                  "Foreigner-Friendly",
+                  "Case-by-Case",
+                  "Unlikely to Sponsor"
+                ] as SponsorshipTier[]
+              ).map((tier) => (
+                <span
+                  key={tier}
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ${sponsorshipStyles[tier]}`}
+                >
+                  {sponsorshipIcons[tier]} {tier}
+                </span>
+              ))}
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <label className="grid gap-2">
                 <span className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-400">
                   Industry
@@ -139,7 +219,7 @@ export function JobsBoard() {
                 <select
                   value={industry}
                   onChange={(event) => updateIndustry(event.target.value)}
-                  className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-300"
+                  className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-300"
                 >
                   <option value="All">All industries</option>
                   {industries.map((item) => (
@@ -152,38 +232,52 @@ export function JobsBoard() {
 
               <label className="grid gap-2">
                 <span className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-400">
-                  Sponsorship
+                  Salary band
                 </span>
                 <select
-                  value={sponsorship}
-                  onChange={(event) => updateSponsorship(event.target.value)}
-                  className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-300"
+                  value={salaryBand}
+                  onChange={(event) => updateSalaryBand(event.target.value)}
+                  className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-300"
                 >
-                  <option value="All">All likelihoods</option>
-                  <option value="High" className="text-slate-900">
-                    High
-                  </option>
-                  <option value="Medium" className="text-slate-900">
-                    Medium
-                  </option>
-                  <option value="Low" className="text-slate-900">
-                    Low
-                  </option>
+                  {salaryBands.map((band) => (
+                    <option key={band.id} value={band.id} className="text-slate-900">
+                      {band.label}
+                    </option>
+                  ))}
                 </select>
               </label>
 
               <label className="grid gap-2">
                 <span className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-400">
-                  Min salary
+                  Visa type
                 </span>
                 <select
-                  value={minSalary}
-                  onChange={(event) => updateMinSalary(Number(event.target.value))}
-                  className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-300"
+                  value={visaType}
+                  onChange={(event) => updateVisaType(event.target.value)}
+                  className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-300"
                 >
-                  {minSalaryOptions.map((salary) => (
-                    <option key={salary} value={salary} className="text-slate-900">
-                      {salary === 0 ? "Any salary" : `${formatSalary(salary)}+ / month`}
+                  <option value="All">All visa types</option>
+                  {visaTypes.map((item) => (
+                    <option key={item} value={item} className="text-slate-900">
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="grid gap-2">
+                <span className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-400">
+                  Company size
+                </span>
+                <select
+                  value={companySize}
+                  onChange={(event) => updateCompanySize(event.target.value)}
+                  className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-sky-300"
+                >
+                  <option value="All">All company sizes</option>
+                  {companySizes.map((item) => (
+                    <option key={item} value={item} className="text-slate-900">
+                      {item}
                     </option>
                   ))}
                 </select>
@@ -201,8 +295,9 @@ export function JobsBoard() {
               </h2>
             </div>
             <p className="max-w-lg text-right text-sm leading-6 text-slate-500 dark:text-slate-400">
-              COMPASS points are directional estimates based on salary, qualifications,
-              and expected demand for the role in Singapore.
+              Companies with active foreign hiring signals are surfaced first. FCF
+              is highlighted when the employer is large enough that the framework is
+              likely relevant.
             </p>
           </div>
 
@@ -212,105 +307,168 @@ export function JobsBoard() {
                   <JobCardSkeleton key={`skeleton-${index}`} />
                 ))
               : filteredJobs.map((job) => (
-              <article
-                key={job.id}
-                className="group rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-card dark:border-slate-800 dark:bg-slate-900 [content-visibility:auto] [contain-intrinsic-size:0_420px]"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-lg font-semibold text-blue-900 dark:bg-blue-500/20 dark:text-blue-100">
-                    {getInitials(job.company)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ${sponsorshipStyles[job.sponsorshipLikelihood]}`}
-                      >
-                        {job.sponsorshipLikelihood} sponsorship
-                      </span>
-                      <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                        {job.industry}
-                      </span>
-                      <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                        {job.jobType}
-                      </span>
-                    </div>
-                    <h3 className="mt-3 text-2xl font-semibold leading-tight text-ink dark:text-white">
-                      {job.title}
-                    </h3>
-                    <p className="mt-1 text-base text-slate-600 dark:text-slate-300">{job.company}</p>
-                  </div>
-                </div>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/80">
-                    <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                      Salary range
-                    </p>
-                    <p className="mt-2 text-lg font-semibold text-ink dark:text-white">
-                      {formatSalary(job.salaryMin)} - {formatSalary(job.salaryMax)}
-                    </p>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">SGD / month</p>
-                  </div>
-                  <div className="rounded-2xl bg-blue-50 p-4 dark:bg-blue-500/10">
-                    <div className="flex items-center gap-2">
-                      <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.2em] text-blue-700 dark:text-blue-300">
-                        COMPASS estimate
-                      </p>
-                      <div className="group/tooltip relative">
-                        <button
-                          type="button"
-                          aria-label="What is this COMPASS estimate?"
-                          className="flex h-5 w-5 items-center justify-center rounded-full border border-blue-300 text-[10px] font-bold text-blue-700 dark:border-blue-400/40 dark:text-blue-200"
-                        >
-                          i
-                        </button>
-                        <div className="pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-56 -translate-x-1/2 rounded-2xl bg-slate-950 px-3 py-2 text-xs leading-5 text-white opacity-0 shadow-lg transition group-hover/tooltip:opacity-100 group-focus-within/tooltip:opacity-100">
-                          Estimated contribution to your COMPASS score if hired at
-                          stated salary
+                  <article
+                    key={job.id}
+                    className="group rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-card dark:border-slate-800 dark:bg-slate-900 [content-visibility:auto] [contain-intrinsic-size:0_520px]"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-lg font-semibold text-blue-900 dark:bg-blue-500/20 dark:text-blue-100">
+                        {getInitials(job.company)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ${sponsorshipStyles[job.sponsorshipTier]}`}
+                          >
+                            {sponsorshipIcons[job.sponsorshipTier]} {job.sponsorshipTier}
+                          </span>
+                          {job.activeForeignHiringQuota ? (
+                            <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-200">
+                              Active foreign hiring
+                            </span>
+                          ) : null}
                         </div>
+                        <h3 className="mt-3 text-2xl font-semibold leading-tight text-ink dark:text-white">
+                          {job.title}
+                        </h3>
+                        <p className="mt-1 text-base text-slate-600 dark:text-slate-300">
+                          {job.company}
+                        </p>
                       </div>
                     </div>
-                    <p className="mt-2 text-lg font-semibold text-blue-900 dark:text-blue-100">
-                      +{job.compassPoints} points
-                    </p>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">
-                      Degree required: {job.requiresDegree ? "Yes" : "No"}
-                    </p>
-                  </div>
-                </div>
 
-                <p className="mt-5 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  {job.sponsorshipNote}
-                </p>
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                        {job.industry}
+                      </span>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                        {job.jobType}
+                      </span>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                        {job.visaType}
+                      </span>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                        {job.companySize}
+                      </span>
+                      {job.fairConsiderationFramework ? (
+                        <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-medium text-sky-900 dark:bg-sky-500/15 dark:text-sky-200">
+                          FCF likely applies
+                        </span>
+                      ) : null}
+                    </div>
 
-                <div className="mt-6 flex flex-wrap items-center gap-3">
-                  <Link
-                    href={{
-                      pathname: "/interview",
-                      query: { company: job.company }
-                    }}
-                    className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
-                  >
-                    Practice Interview
-                  </Link>
-                  <a
-                    href={job.linkedinUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                  >
-                    View on LinkedIn
-                  </a>
-                </div>
-              </article>
-            ))}
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/80">
+                        <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                          Salary range
+                        </p>
+                        <p className="mt-2 text-lg font-semibold text-ink dark:text-white">
+                          {formatSalary(job.salaryMin)} - {formatSalary(job.salaryMax)}
+                        </p>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                          SGD / month
+                        </p>
+                      </div>
+                      <div className="rounded-2xl bg-blue-50 p-4 dark:bg-blue-500/10">
+                        <div className="flex items-center gap-2">
+                          <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.2em] text-blue-700 dark:text-blue-300">
+                            COMPASS estimate
+                          </p>
+                          <div className="group/tooltip relative">
+                            <button
+                              type="button"
+                              aria-label="What is this COMPASS estimate?"
+                              className="flex h-5 w-5 items-center justify-center rounded-full border border-blue-300 text-[10px] font-bold text-blue-700 dark:border-blue-400/40 dark:text-blue-200"
+                            >
+                              i
+                            </button>
+                            <div className="pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-56 -translate-x-1/2 rounded-2xl bg-slate-950 px-3 py-2 text-xs leading-5 text-white opacity-0 shadow-lg transition group-hover/tooltip:opacity-100 group-focus-within/tooltip:opacity-100">
+                              Estimated contribution to your COMPASS score if hired
+                              at stated salary
+                            </div>
+                          </div>
+                        </div>
+                        <p className="mt-2 text-lg font-semibold text-blue-900 dark:text-blue-100">
+                          +{job.compassPoints} points
+                        </p>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">
+                          Degree required: {job.requiresDegree ? "Yes" : "No"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className="mt-5 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      {job.sponsorshipNote}
+                    </p>
+
+                    <div className="mt-6 flex flex-wrap items-center gap-3">
+                      <Link
+                        href={{
+                          pathname: "/interview",
+                          query: { company: job.company }
+                        }}
+                        className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+                      >
+                        Practice Interview
+                      </Link>
+                      <a
+                        href={job.applyUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                      >
+                        Apply Now
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => loadPortalResults(job)}
+                        disabled={loadingPortalsFor === job.id}
+                        className="inline-flex items-center justify-center rounded-full border border-sky-300 bg-sky-50 px-5 py-3 text-sm font-semibold text-sky-800 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-70 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200"
+                      >
+                        {loadingPortalsFor === job.id
+                          ? "Searching portals..."
+                          : "Search Job Boards"}
+                      </button>
+                    </div>
+
+                    {portalErrorByJob[job.id] ? (
+                      <p className="mt-3 text-sm text-rose-700 dark:text-rose-300">
+                        {portalErrorByJob[job.id]}
+                      </p>
+                    ) : null}
+
+                    {portalResults[job.id]?.length ? (
+                      <div className="mt-4 rounded-[1.5rem] bg-slate-50 p-4 dark:bg-slate-800/60">
+                        <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                          Live apply portals
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {portalResults[job.id].map((portal) => (
+                            <a
+                              key={`${job.id}-${portal.url}`}
+                              href={portal.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex rounded-full border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                              title={portal.snippet}
+                            >
+                              Apply on {portal.source}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </article>
+                ))}
           </div>
 
           {!isLoading && filteredJobs.length === 0 ? (
             <div className="mt-8 rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 p-8 text-center dark:border-slate-700 dark:bg-slate-900">
-              <p className="text-lg font-semibold text-ink dark:text-white">No roles match those filters.</p>
+              <p className="text-lg font-semibold text-ink dark:text-white">
+                No roles match those filters.
+              </p>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                Reduce the minimum salary or widen sponsorship criteria to see more
+                Widen the salary band or company-size filter to see more
                 sponsor-friendly openings.
               </p>
             </div>

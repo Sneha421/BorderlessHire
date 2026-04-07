@@ -13,11 +13,59 @@ const links = [
 
 function LogoMark() {
   return (
-    <div className="relative h-10 w-10 rounded-full bg-gradient-to-br from-sky-500 via-blue-600 to-cyan-400 text-white shadow-lg shadow-blue-500/25">
-      <div className="absolute inset-[7px] rounded-full border border-white/60" />
-      <div className="absolute left-[7px] top-[12px] h-1.5 w-5 rounded-full bg-white/90" />
-      <div className="absolute left-[20px] top-[8px] h-0 w-0 border-b-[5px] border-l-[8px] border-b-transparent border-l-white/95 border-t-[5px] border-t-transparent" />
-      <div className="absolute right-[3px] top-[3px] h-7 w-7 rounded-full border border-dashed border-white/55" />
+    <div className="relative flex h-9 w-9 items-center justify-center text-sky-600 dark:text-sky-400">
+      <svg
+        viewBox="0 0 32 32"
+        fill="none"
+        className="h-9 w-9"
+        aria-hidden="true"
+      >
+        <circle
+          cx="16"
+          cy="16"
+          r="12"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill="none"
+        />
+        <ellipse
+          cx="16"
+          cy="16"
+          rx="5"
+          ry="12"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill="none"
+        />
+        <line
+          x1="4"
+          y1="16"
+          x2="28"
+          y2="16"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <line
+          x1="6"
+          y1="10"
+          x2="26"
+          y2="10"
+          stroke="currentColor"
+          strokeWidth="1"
+          opacity="0.6"
+        />
+        <line
+          x1="6"
+          y1="22"
+          x2="26"
+          y2="22"
+          stroke="currentColor"
+          strokeWidth="1"
+          opacity="0.6"
+        />
+        <path d="M22 8 L26 6 L27 7 L24 10 L22 8Z" fill="currentColor" />
+        <path d="M24 10 L26 12 L25 12.5 L23 11 L24 10Z" fill="currentColor" />
+      </svg>
     </div>
   );
 }
@@ -26,22 +74,19 @@ export function TopNav() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/75">
+    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/88 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-950/82">
       <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-10">
         <Link href="/" className="flex min-w-0 items-center gap-3">
           <LogoMark />
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
-              BorderlessHire
-            </p>
-            <p className="truncate font-[family:var(--font-mono)] text-[10px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-              Singapore career navigation
+            <p className="truncate text-lg font-semibold tracking-tight text-slate-950 dark:text-slate-50">
+              Borderless<span className="text-sky-600 dark:text-sky-400">Hire</span>
             </p>
           </div>
         </Link>
 
         <div className="flex items-center gap-2">
-          <div className="hidden items-center rounded-full border border-slate-200 bg-slate-100/80 p-1 dark:border-slate-800 dark:bg-slate-900/90 sm:flex">
+          <div className="hidden items-center rounded-lg bg-slate-100 p-1 dark:bg-slate-900 sm:flex">
             {links.map((link) => {
               const isActive =
                 pathname === link.href ||
@@ -51,9 +96,9 @@ export function TopNav() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-white text-sky-700 shadow-sm dark:bg-slate-800 dark:text-sky-300"
+                      ? "bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white"
                       : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
                   }`}
                 >
