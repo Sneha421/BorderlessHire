@@ -4,8 +4,12 @@ import OpenAI from "openai";
 
 let client: OpenAI | null = null;
 
+export function hasOpenAIKey() {
+  return Boolean(process.env.OPENAI_API_KEY);
+}
+
 export function getOpenAIClient() {
-  if (!process.env.OPENAI_API_KEY) {
+  if (!hasOpenAIKey()) {
     throw new Error("Missing OPENAI_API_KEY environment variable.");
   }
 
