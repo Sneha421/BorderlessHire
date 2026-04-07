@@ -19,8 +19,9 @@ export default function InterviewPage({ searchParams }: InterviewPageProps) {
           Practice for {company || "your target company"} with a pre-filled interview setup.
         </h1>
         <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-300">
-          Use the coach to rehearse first-round questions, refine answer structure,
-          and tune your company angle before you apply. If you arrived from the job
+          Rehearse first-round questions, stress-test visa and salary conversations,
+          and switch into a voice interview where Sarah Lim speaks, listens, and
+          pushes back like a real Singapore interviewer. If you arrived from the job
           board, the company context is already pre-filled.
         </p>
         <div className="mt-8">
