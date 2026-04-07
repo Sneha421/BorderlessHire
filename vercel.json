@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/actions/chat.ts": {
+      "maxDuration": 30
+    }
+  }
+}

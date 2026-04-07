@@ -1,0 +1,372 @@
+export type SponsorshipLikelihood = "High" | "Medium" | "Low";
+export type JobType = "Full-time" | "Contract";
+
+export type JobListing = {
+  id: string;
+  title: string;
+  company: string;
+  industry: "Tech" | "Finance" | "Consulting" | "Healthcare" | "Government-linked";
+  salaryMin: number;
+  salaryMax: number;
+  sponsorshipLikelihood: SponsorshipLikelihood;
+  sponsorshipNote: string;
+  compassPoints: number;
+  jobType: JobType;
+  requiresDegree: boolean;
+  linkedinUrl: string;
+};
+
+export const jobs: JobListing[] = [
+  {
+    id: "grab-product-analyst",
+    title: "Product Analyst",
+    company: "Grab",
+    industry: "Tech",
+    salaryMin: 6200,
+    salaryMax: 8200,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "Grab regularly sponsors Employment Pass hires across product and data teams.",
+    compassPoints: 15,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/grabapp/jobs/"
+  },
+  {
+    id: "grab-software-engineer",
+    title: "Software Engineer, Platform",
+    company: "Grab",
+    industry: "Tech",
+    salaryMin: 7000,
+    salaryMax: 9800,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "Regional engineering roles at Grab commonly support EP applications for specialized talent.",
+    compassPoints: 17,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/grabapp/jobs/"
+  },
+  {
+    id: "sea-risk-analyst",
+    title: "Risk Analyst",
+    company: "Sea",
+    industry: "Tech",
+    salaryMin: 5600,
+    salaryMax: 7600,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "Sea's Singapore HQ frequently hires international graduates into analyst tracks.",
+    compassPoints: 14,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/sea-limited/jobs/"
+  },
+  {
+    id: "shopee-bizops",
+    title: "Business Operations Associate",
+    company: "Shopee",
+    industry: "Tech",
+    salaryMin: 4800,
+    salaryMax: 6500,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "Shopee has a track record of sponsoring high-potential regional hires in SG.",
+    compassPoints: 12,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/shopee/jobs/"
+  },
+  {
+    id: "bytedance-data-scientist",
+    title: "Data Scientist",
+    company: "ByteDance SG",
+    industry: "Tech",
+    salaryMin: 8000,
+    salaryMax: 11000,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "ByteDance Singapore sponsors niche data and recommendation-system talent at scale.",
+    compassPoints: 18,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/bytedance/jobs/"
+  },
+  {
+    id: "google-cloud-consultant",
+    title: "Cloud Solutions Consultant",
+    company: "Google Singapore",
+    industry: "Tech",
+    salaryMin: 9000,
+    salaryMax: 13000,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "Google Singapore consistently sponsors EPs for technical customer-facing roles.",
+    compassPoints: 19,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/google/jobs/"
+  },
+  {
+    id: "dbs-aml-analyst",
+    title: "AML Analyst",
+    company: "DBS",
+    industry: "Finance",
+    salaryMin: 5200,
+    salaryMax: 6900,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "Large Singapore banks such as DBS routinely sponsor specialized compliance and tech talent.",
+    compassPoints: 13,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/dbs-bank/jobs/"
+  },
+  {
+    id: "dbs-data-engineer",
+    title: "Data Engineer",
+    company: "DBS",
+    industry: "Finance",
+    salaryMin: 7000,
+    salaryMax: 9200,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "DBS tech transformation teams are accustomed to international hiring in Singapore.",
+    compassPoints: 16,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/dbs-bank/jobs/"
+  },
+  {
+    id: "uob-product-manager",
+    title: "Digital Product Manager",
+    company: "UOB",
+    industry: "Finance",
+    salaryMin: 6800,
+    salaryMax: 9000,
+    sponsorshipLikelihood: "Medium",
+    sponsorshipNote: "UOB sponsors selectively, especially for digital banking roles with regional exposure.",
+    compassPoints: 14,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/uob/jobs/"
+  },
+  {
+    id: "standard-chartered-analyst",
+    title: "Strategy Analyst",
+    company: "Standard Chartered",
+    industry: "Finance",
+    salaryMin: 6300,
+    salaryMax: 8400,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "Standard Chartered's Singapore base often sponsors graduate and analyst hires.",
+    compassPoints: 15,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/standard-chartered-bank/jobs/"
+  },
+  {
+    id: "ocbc-risk-manager",
+    title: "Risk Management Associate",
+    company: "OCBC",
+    industry: "Finance",
+    salaryMin: 5100,
+    salaryMax: 6800,
+    sponsorshipLikelihood: "Medium",
+    sponsorshipNote: "OCBC tends to sponsor when candidates bring quantitative or regulatory specialization.",
+    compassPoints: 12,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/ocbc-bank/jobs/"
+  },
+  {
+    id: "mckinsey-ba",
+    title: "Business Analyst",
+    company: "McKinsey & Company",
+    industry: "Consulting",
+    salaryMin: 7800,
+    salaryMax: 9800,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "Top consulting firms regularly sponsor EPs for globally mobile consultants.",
+    compassPoints: 17,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/mckinsey/jobs/"
+  },
+  {
+    id: "bcg-associate",
+    title: "Associate",
+    company: "BCG",
+    industry: "Consulting",
+    salaryMin: 7600,
+    salaryMax: 9800,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "BCG Singapore routinely relocates and sponsors early-career strategy talent.",
+    compassPoints: 17,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/boston-consulting-group/jobs/"
+  },
+  {
+    id: "accenture-cloud-analyst",
+    title: "Cloud Transformation Analyst",
+    company: "Accenture",
+    industry: "Consulting",
+    salaryMin: 5000,
+    salaryMax: 6900,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "Accenture Singapore has established work-pass processes for client delivery talent.",
+    compassPoints: 13,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/accenture/jobs/"
+  },
+  {
+    id: "ey-tech-consultant",
+    title: "Technology Consultant",
+    company: "EY",
+    industry: "Consulting",
+    salaryMin: 4700,
+    salaryMax: 6200,
+    sponsorshipLikelihood: "Medium",
+    sponsorshipNote: "Big Four firms sponsor, but offer rates and specialization drive approval odds.",
+    compassPoints: 11,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/ernstandyoung/jobs/"
+  },
+  {
+    id: "kpmg-cyber-analyst",
+    title: "Cybersecurity Analyst",
+    company: "KPMG",
+    industry: "Consulting",
+    salaryMin: 4800,
+    salaryMax: 6500,
+    sponsorshipLikelihood: "Medium",
+    sponsorshipNote: "KPMG Singapore sponsors more readily for cyber and data-risk roles than generalist posts.",
+    compassPoints: 12,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/kpmg/jobs/"
+  },
+  {
+    id: "singhealth-data-analyst",
+    title: "Healthcare Data Analyst",
+    company: "SingHealth",
+    industry: "Healthcare",
+    salaryMin: 4600,
+    salaryMax: 6100,
+    sponsorshipLikelihood: "Medium",
+    sponsorshipNote: "Public healthcare groups sponsor selectively for analytics and clinical informatics roles.",
+    compassPoints: 10,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/singhealth/jobs/"
+  },
+  {
+    id: "singhealth-project-manager",
+    title: "Transformation Project Manager",
+    company: "SingHealth",
+    industry: "Healthcare",
+    salaryMin: 5800,
+    salaryMax: 7600,
+    sponsorshipLikelihood: "Medium",
+    sponsorshipNote: "Operational transformation roles can qualify when tied to scarce domain capability.",
+    compassPoints: 12,
+    jobType: "Contract",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/singhealth/jobs/"
+  },
+  {
+    id: "raffles-ops-executive",
+    title: "Hospital Operations Executive",
+    company: "Raffles Medical",
+    industry: "Healthcare",
+    salaryMin: 3900,
+    salaryMax: 5200,
+    sponsorshipLikelihood: "Low",
+    sponsorshipNote: "Private healthcare operators usually reserve sponsorship for more specialized functions.",
+    compassPoints: 8,
+    jobType: "Full-time",
+    requiresDegree: false,
+    linkedinUrl: "https://www.linkedin.com/company/raffles-medical-group/jobs/"
+  },
+  {
+    id: "ihh-business-analyst",
+    title: "Business Analyst",
+    company: "IHH Healthcare Singapore",
+    industry: "Healthcare",
+    salaryMin: 4300,
+    salaryMax: 5600,
+    sponsorshipLikelihood: "Low",
+    sponsorshipNote: "Sponsorship is possible but less common for general corporate healthcare roles.",
+    compassPoints: 9,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/ihh-healthcare/jobs/"
+  },
+  {
+    id: "gic-investment-analyst",
+    title: "Investment Analyst",
+    company: "GIC",
+    industry: "Government-linked",
+    salaryMin: 8200,
+    salaryMax: 11500,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "GIC hires globally and has robust sponsorship pathways for investment talent.",
+    compassPoints: 18,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/gic/jobs/"
+  },
+  {
+    id: "temasek-data-analyst",
+    title: "Portfolio Data Analyst",
+    company: "Temasek",
+    industry: "Government-linked",
+    salaryMin: 7200,
+    salaryMax: 9800,
+    sponsorshipLikelihood: "High",
+    sponsorshipNote: "Temasek sponsors for strategic and data-intensive roles with regional responsibility.",
+    compassPoints: 16,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/temasek/jobs/"
+  },
+  {
+    id: "st-engineering-ai-engineer",
+    title: "AI Engineer",
+    company: "ST Engineering",
+    industry: "Government-linked",
+    salaryMin: 6200,
+    salaryMax: 8200,
+    sponsorshipLikelihood: "Medium",
+    sponsorshipNote: "Government-linked firms sponsor selectively in high-skill engineering tracks.",
+    compassPoints: 14,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/st-engineering/jobs/"
+  },
+  {
+    id: "enterprise-singapore-manager",
+    title: "Market Development Manager",
+    company: "Enterprise Singapore",
+    industry: "Government-linked",
+    salaryMin: 5000,
+    salaryMax: 6800,
+    sponsorshipLikelihood: "Low",
+    sponsorshipNote: "Public-sector adjacent roles often prioritize local eligibility before sponsorship.",
+    compassPoints: 9,
+    jobType: "Contract",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/enterprise-singapore/jobs/"
+  },
+  {
+    id: "ncs-software-engineer",
+    title: "Software Engineer",
+    company: "NCS",
+    industry: "Government-linked",
+    salaryMin: 4800,
+    salaryMax: 6500,
+    sponsorshipLikelihood: "Medium",
+    sponsorshipNote: "NCS sponsors for delivery roles when projects require niche engineering experience.",
+    compassPoints: 11,
+    jobType: "Full-time",
+    requiresDegree: true,
+    linkedinUrl: "https://www.linkedin.com/company/ncs-group/jobs/"
+  }
+];
+
+export const industries = Array.from(new Set(jobs.map((job) => job.industry)));
