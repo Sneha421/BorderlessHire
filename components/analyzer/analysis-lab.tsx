@@ -74,7 +74,7 @@ export function AnalysisLab() {
   return (
     <div className="space-y-6">
       <section className="space-y-6">
-        <div className="rounded-[1.75rem] border border-slate-200 bg-white/85 p-5 dark:border-slate-800 dark:bg-slate-950/80">
+        <div className="rounded-[1.45rem] border border-slate-200 bg-white/85 p-3.5 dark:border-slate-800 dark:bg-slate-950/80 sm:p-4">
           <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
             Saved jobs
           </p>
@@ -102,7 +102,7 @@ export function AnalysisLab() {
 
         <JobPostingAnalyzer />
 
-        <div className="rounded-[2rem] border border-slate-200 bg-white/85 p-5 shadow-card dark:border-slate-800 dark:bg-slate-950/80 sm:p-7">
+        <div className="rounded-[1.6rem] border border-slate-200 bg-white/85 p-4 shadow-card dark:border-slate-800 dark:bg-slate-950/80 sm:rounded-[1.8rem] sm:p-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
@@ -159,7 +159,7 @@ export function AnalysisLab() {
               <button
                 type="submit"
                 disabled={isApplyLoading}
-                className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-400"
+                className="button-primary dark:border-blue-300/20"
               >
                 {isApplyLoading ? "Running workers..." : "Run Apply Check"}
               </button>

@@ -137,7 +137,7 @@ export function CompassCalculator() {
   return (
     <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
       <aside className="space-y-5">
-        <div className="rounded-[1.75rem] border border-slate-200 bg-white/80 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/80">
+        <div className="rounded-[1.75rem] border border-slate-200 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/80 sm:p-5">
           <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
             Calculator brief
           </p>
@@ -150,7 +150,7 @@ export function CompassCalculator() {
           </p>
         </div>
 
-        <div className="rounded-[1.75rem] border border-slate-200 bg-slate-950 p-5 text-white dark:border-slate-800">
+        <div className="rounded-[1.75rem] border border-slate-200 bg-slate-950 p-4 text-white dark:border-slate-800 sm:p-5">
           <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-400">
             Selected benchmark
           </p>
@@ -161,7 +161,7 @@ export function CompassCalculator() {
           </p>
         </div>
 
-        <div className="rounded-[1.75rem] border border-slate-200 bg-white/80 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/80">
+        <div className="rounded-[1.75rem] border border-slate-200 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/80 sm:p-5">
           <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
             Saved scores
           </p>
@@ -190,7 +190,7 @@ export function CompassCalculator() {
         </div>
       </aside>
 
-      <section className="rounded-[2rem] border border-slate-200 bg-white/85 p-5 shadow-card dark:border-slate-800 dark:bg-slate-950/80 sm:p-7">
+      <section className="rounded-[1.8rem] border border-slate-200 bg-white/85 p-4 shadow-card dark:border-slate-800 dark:bg-slate-950/80 sm:rounded-[2rem] sm:p-6">
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2">
@@ -198,7 +198,7 @@ export function CompassCalculator() {
               <select
                 value={form.targetCompany}
                 onChange={(event) => updateField("targetCompany", event.target.value)}
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                className="ui-select rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               >
                 <option value="">General estimate</option>
                 {companies.map((company) => (
@@ -214,7 +214,7 @@ export function CompassCalculator() {
               <select
                 value={form.occupation}
                 onChange={(event) => updateField("occupation", event.target.value as OccupationKey)}
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                className="ui-select rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               >
                 {Object.keys(occupationBenchmarks).map((occupation) => (
                   <option key={occupation} value={occupation}>
@@ -245,7 +245,7 @@ export function CompassCalculator() {
                 onChange={(event) =>
                   updateField("qualificationTier", event.target.value as QualificationTier)
                 }
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                className="ui-select rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               >
                 {qualificationOptions.map((tier) => (
                   <option key={tier} value={tier}>
@@ -262,7 +262,7 @@ export function CompassCalculator() {
               <select
                 value={form.diversityBand}
                 onChange={(event) => updateField("diversityBand", event.target.value as CompassInput["diversityBand"])}
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                className="ui-select rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               >
                 {diversityOptions.map((option) => (
                   <option key={option} value={option}>
@@ -300,7 +300,7 @@ export function CompassCalculator() {
             <button
               type="submit"
               disabled={isLoading}
-              className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+              className="button-primary"
             >
               {isLoading ? "Calculating..." : "Run COMPASS Check"}
             </button>

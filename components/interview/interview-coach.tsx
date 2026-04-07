@@ -562,7 +562,7 @@ export function InterviewCoach({ company }: InterviewCoachProps) {
               type="button"
               onClick={startVoiceInterview}
               disabled={!hasVoiceSupport || isStreaming || isRecording || isTranscribing}
-              className="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+              className="button-primary"
             >
               Start Sarah Voice Interview
             </button>
@@ -575,11 +575,7 @@ export function InterviewCoach({ company }: InterviewCoachProps) {
                 isStreaming ||
                 isTranscribing
               }
-              className={`inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400 ${
-                isRecording
-                  ? "bg-rose-600 hover:bg-rose-700"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
+              className={isRecording ? "button-danger" : "button-primary"}
             >
               {isRecording ? "Stop Recording" : "Record Your Answer"}
             </button>
@@ -679,7 +675,7 @@ export function InterviewCoach({ company }: InterviewCoachProps) {
             <button
               type="submit"
               disabled={isStreaming || isRecording || isTranscribing}
-              className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+              className="button-primary"
             >
               {isStreaming ? "Streaming..." : mode === "voice" ? "Send to Sarah" : "Send to Coach"}
             </button>
