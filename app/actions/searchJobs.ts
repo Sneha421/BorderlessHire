@@ -29,6 +29,18 @@ type SearchJobsResponse = {
   reason?: string;
 };
 
+type SearchJobsCacheEntry = {
+  value: SearchJobsResponse;
+  expiresAt: number;
+};
+
+declare global {
+  var __borderlessHireJobsCache: Map<string, SearchJobsCacheEntry> | undefined;
+  var __borderlessHireJobsInFlight:
+    | Map<string, Promise<SearchJobsResponse>>
+    | undefined;
+}
+
 const CLOSED_LANGUAGE =
   /no longer accepting applications|applications closed|position filled|job expired|no sponsorship available/i;
 const MIN_LIVE_FRESHNESS_SCORE = 2;
@@ -36,6 +48,12 @@ const MAX_LIVE_RESULTS = 36;
 const MAX_COMPANY_QUERIES = 8;
 const MAX_BROAD_QUERY_BATCHES = 3;
 const EXA_QUERY_CONCURRENCY = 4;
+const LIVE_JOBS_CACHE_TTL_MS = Number(
+  process.env.LIVE_JOBS_CACHE_TTL_MS ?? 1_200_000
+);
+const EMPTY_JOBS_CACHE_TTL_MS = Number(
+  process.env.EMPTY_JOBS_CACHE_TTL_MS ?? 180_000
+);
 
 const SEARCH_DOMAINS = [
   "linkedin.com",
@@ -121,6 +139,32 @@ const responseSchema = {
   },
   required: ["jobs"]
 } as const;
+
+function getJobsCache() {
+  if (!globalThis.__borderlessHireJobsCache) {
+    globalThis.__borderlessHireJobsCache = new Map();
+  }
+
+  return globalThis.__borderlessHireJobsCache;
+}
+
+function getJobsInFlight() {
+  if (!globalThis.__borderlessHireJobsInFlight) {
+    globalThis.__borderlessHireJobsInFlight = new Map();
+  }
+
+  return globalThis.__borderlessHireJobsInFlight;
+}
+
+function normalizeSearchCacheKey(query?: string) {
+  return query?.trim().toLowerCase() || "__all__";
+}
+
+function getCacheTtlMs(result: SearchJobsResponse) {
+  return result.jobs.length > 0
+    ? LIVE_JOBS_CACHE_TTL_MS
+    : EMPTY_JOBS_CACHE_TTL_MS;
+}
 
 function normalizeUrl(url: string) {
   try {
@@ -911,7 +955,7 @@ async function analyzeSearchResults(selectedSeeds: JobListing[], results: ExaRes
   return parsed.jobs;
 }
 
-export async function searchSGJobs(
+async function searchSGJobsUncached(
   query?: string
 ): Promise<SearchJobsResponse> {
   const apiKey = process.env.EXA_API_KEY;
@@ -998,4 +1042,38 @@ export async function searchSGJobs(
       reasons[0] ??
       "No live Singapore job postings could be retrieved from Exa."
   };
+}
+
+export async function searchSGJobs(
+  query?: string
+): Promise<SearchJobsResponse> {
+  const normalizedQuery = query?.trim() || undefined;
+  const cacheKey = normalizeSearchCacheKey(normalizedQuery);
+  const cache = getJobsCache();
+  const inFlight = getJobsInFlight();
+  const cachedEntry = cache.get(cacheKey);
+
+  if (cachedEntry && cachedEntry.expiresAt > Date.now()) {
+    return cachedEntry.value;
+  }
+
+  const existingRequest = inFlight.get(cacheKey);
+  if (existingRequest) {
+    return existingRequest;
+  }
+
+  const request = searchSGJobsUncached(normalizedQuery)
+    .then((result) => {
+      cache.set(cacheKey, {
+        value: result,
+        expiresAt: Date.now() + getCacheTtlMs(result)
+      });
+      return result;
+    })
+    .finally(() => {
+      inFlight.delete(cacheKey);
+    });
+
+  inFlight.set(cacheKey, request);
+  return request;
 }
