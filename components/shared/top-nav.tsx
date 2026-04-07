@@ -8,7 +8,9 @@ import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 const links = [
   { href: "/", label: "Job Board" },
-  { href: "/interview", label: "Interview Coach" }
+  { href: "/compass", label: "COMPASS" },
+  { href: "/interview", label: "Interview Coach" },
+  { href: "/analyzer", label: "Analyzer" }
 ] as const satisfies ReadonlyArray<{ href: Route; label: string }>;
 
 function LogoMark() {

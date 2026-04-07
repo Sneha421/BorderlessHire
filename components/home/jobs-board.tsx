@@ -9,7 +9,6 @@ import {
 } from "react";
 
 import { HeroSection } from "@/components/home/hero-section";
-import { JobPostingAnalyzer } from "@/components/home/job-posting-analyzer";
 import { JobCardSkeleton } from "@/components/home/job-card-skeleton";
 import {
   companySizes,
@@ -187,7 +186,6 @@ export function JobsBoard() {
       <div className="absolute inset-0 -z-10 bg-grid-fade bg-[size:32px_32px] opacity-30" />
       <section className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-7xl flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
         <HeroSection featuredCount={featuredCount} totalJobs={jobs.length} />
-        <JobPostingAnalyzer />
 
         <div className="mt-6 rounded-[2rem] border border-white/70 bg-white/75 p-4 shadow-card backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/70 sm:p-6">
           <div
