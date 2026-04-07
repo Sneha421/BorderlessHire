@@ -20,6 +20,43 @@ const starterPrompts = [
   "What should I say if they ask whether I am a PR or citizen?"
 ];
 
+function MicrophoneIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-32 w-32 scale-[2.5]">
+      <rect
+        x="9"
+        y="3.5"
+        width="6"
+        height="11"
+        rx="3"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M6.5 11.5a5.5 5.5 0 1 0 11 0M12 17v3.5M8.5 20.5h7"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function WaveformIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-32 w-32 scale-[2.5]">
+      <path
+        d="M4 13h2l1.5-4 3 10 2.5-8 1.5 4H20"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function InterviewCoach({ company }: InterviewCoachProps) {
   const [input, setInput] = useState(
     company
@@ -515,16 +552,20 @@ export function InterviewCoach({ company }: InterviewCoachProps) {
           </div>
         </div>
 
-        <div className="rounded-[1.75rem] border border-slate-200 bg-white/80 p-5 dark:border-slate-800 dark:bg-slate-900/80">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                Voice interview
-              </p>
-              <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
-                Sarah speaks and listens
-              </p>
-            </div>
+      </aside>
+
+      <section className="rounded-[2rem] border border-slate-200 bg-white/85 p-4 shadow-card dark:border-slate-800 dark:bg-slate-950/80 sm:p-6">
+        <div className="mb-4 flex flex-col gap-3 rounded-[1.35rem] border border-slate-200 bg-white/80 p-4 dark:border-slate-800 dark:bg-slate-900/80 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-[family:var(--font-mono)] text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+              Voice interview
+            </p>
+            <p className="mt-2 text-base font-semibold text-slate-950 dark:text-white">
+              Sarah speaks and listens inside the chat panel
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
             <div className="flex rounded-full border border-slate-300 p-1 dark:border-slate-700">
               <button
                 type="button"
@@ -550,22 +591,18 @@ export function InterviewCoach({ company }: InterviewCoachProps) {
                 Voice
               </button>
             </div>
-          </div>
 
-          <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-            Use OpenAI speech models so Sarah can ask questions aloud, listen to
-            your answer, and respond like an interviewer.
-          </p>
-
-          <div className="mt-4 flex flex-col gap-3">
             <button
               type="button"
               onClick={startVoiceInterview}
               disabled={!hasVoiceSupport || isStreaming || isRecording || isTranscribing}
-              className="button-primary"
+              className="button-primary h-14 w-14 p-0"
+              aria-label="Start Sarah voice interview"
+              title="Start Sarah voice interview"
             >
-              Start Sarah Voice Interview
+              <WaveformIcon />
             </button>
+
             <button
               type="button"
               onClick={isRecording ? stopRecording : startRecording}
@@ -575,43 +612,15 @@ export function InterviewCoach({ company }: InterviewCoachProps) {
                 isStreaming ||
                 isTranscribing
               }
-              className={isRecording ? "button-danger" : "button-primary"}
+              className={`${isRecording ? "button-danger" : "button-primary"} h-14 w-14 p-0`}
+              aria-label={isRecording ? "Stop recording" : "Record your answer"}
+              title={isRecording ? "Stop recording" : "Record your answer"}
             >
-              {isRecording ? "Stop Recording" : "Record Your Answer"}
+              <MicrophoneIcon />
             </button>
           </div>
-
-          <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">
-            AI-generated voice disclosure: Sarah&apos;s audio is synthesized by an
-            OpenAI voice model, not a human recording.
-          </p>
-
-          {lastTranscript ? (
-            <div className="mt-4 rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-              <p className="font-[family:var(--font-mono)] text-[10px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                Latest transcript
-              </p>
-              <p className="mt-2 leading-6">{lastTranscript}</p>
-            </div>
-          ) : null}
-
-          <audio
-            ref={audioPlayerRef}
-            controls
-            src={audioUrl ?? undefined}
-            onPlay={() => setIsSpeaking(true)}
-            onEnded={() => setIsSpeaking(false)}
-            onPause={() => {
-              if (!isStreaming) {
-                setIsSpeaking(false);
-              }
-            }}
-            className={`mt-4 w-full ${audioUrl ? "block" : "hidden"}`}
-          />
         </div>
-      </aside>
 
-      <section className="rounded-[2rem] border border-slate-200 bg-white/85 p-4 shadow-card dark:border-slate-800 dark:bg-slate-950/80 sm:p-6">
         <div className="flex min-h-[26rem] flex-col gap-4 rounded-[1.5rem] bg-slate-50 p-4 dark:bg-slate-900/90">
           {visibleMessages.length === 0 ? (
             <div className="flex flex-1 items-center justify-center rounded-[1.25rem] border border-dashed border-slate-300 bg-white/70 p-6 text-center dark:border-slate-700 dark:bg-slate-950/70">
@@ -648,6 +657,36 @@ export function InterviewCoach({ company }: InterviewCoachProps) {
               </article>
             ))
           )}
+        </div>
+
+        <div className="mt-4 space-y-3">
+          <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
+            AI-generated voice disclosure: Sarah&apos;s audio is synthesized by an
+            OpenAI voice model, not a human recording.
+          </p>
+
+          {lastTranscript ? (
+            <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+              <p className="font-[family:var(--font-mono)] text-[10px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                Latest transcript
+              </p>
+              <p className="mt-2 leading-6">{lastTranscript}</p>
+            </div>
+          ) : null}
+
+          <audio
+            ref={audioPlayerRef}
+            controls
+            src={audioUrl ?? undefined}
+            onPlay={() => setIsSpeaking(true)}
+            onEnded={() => setIsSpeaking(false)}
+            onPause={() => {
+              if (!isStreaming) {
+                setIsSpeaking(false);
+              }
+            }}
+            className={`w-full ${audioUrl ? "block" : "hidden"}`}
+          />
         </div>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-3">
