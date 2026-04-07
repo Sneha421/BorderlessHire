@@ -32,9 +32,23 @@ export type JobListing = {
   fairConsiderationFramework: boolean;
   applyUrl: string;
   portalSearchQuery: string;
+  listingSource?: string;
+  listingSnippet?: string;
+  listingRecency?: string;
+  listingFreshnessScore?: number;
+  isLivePosting?: boolean;
 };
 
-type JobSeed = Omit<JobListing, "fairConsiderationFramework" | "portalSearchQuery">;
+type JobSeed = Omit<
+  JobListing,
+  | "fairConsiderationFramework"
+  | "portalSearchQuery"
+  | "listingSource"
+  | "listingSnippet"
+  | "listingRecency"
+  | "listingFreshnessScore"
+  | "isLivePosting"
+>;
 
 const jobSeeds: JobSeed[] = [
   {

@@ -2,6 +2,7 @@ import type { JobListing, SponsorshipTier } from "@/lib/jobs";
 
 export const SAVED_JOBS_KEY = "borderlesshire-saved-jobs";
 export const SAVED_COMPASS_KEY = "borderlesshire-saved-compass";
+export const CACHED_LIVE_JOBS_KEY = "borderlesshire-cached-live-jobs";
 
 export type SavedJob = {
   id: string;
@@ -79,4 +80,12 @@ export function saveCompassResult(result: SavedCompassResult) {
   const next = [result, ...current.filter((item) => item.id !== result.id)].slice(0, 10);
   writeJSON(SAVED_COMPASS_KEY, next);
   return next;
+}
+
+export function readCachedLiveJobs() {
+  return readJSON<JobListing[]>(CACHED_LIVE_JOBS_KEY, []);
+}
+
+export function writeCachedLiveJobs(jobs: JobListing[]) {
+  writeJSON(CACHED_LIVE_JOBS_KEY, jobs);
 }

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 
+import { searchJobPortals } from "@/lib/exa";
 import { getOpenAIClient } from "@/lib/openai";
-import { searchJobPortals } from "@/lib/apify";
 
 export const runtime = "nodejs";
 

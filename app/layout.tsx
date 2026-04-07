@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Script from "next/script";
 
@@ -27,7 +28,9 @@ export default function RootLayout({
             })();
           `}
         </Script>
-        <TopNav />
+        <Suspense fallback={null}>
+          <TopNav />
+        </Suspense>
         {children}
       </body>
     </html>
